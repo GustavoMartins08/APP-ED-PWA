@@ -18,11 +18,11 @@ const NewsletterDetail: React.FC = () => {
     const loadNewsletter = async () => {
       window.scrollTo(0, 0);
       const newsBase = await fetchLatestNews();
-      
+
       const mockItems: NewsItem[] = [
-        { 
-          ...newsBase[0], 
-          id: 'n1', 
+        {
+          ...newsBase[0],
+          id: 'n1',
           title: 'A Ascensão dos Agentes Autônomos na Gestão de Fundos',
           keyPoints: [
             'IA agora opera 24/7 em mercados secundários sem supervisão humana.',
@@ -30,9 +30,9 @@ const NewsletterDetail: React.FC = () => {
             'Necessidade urgente de auditoria algorítmica em tempo real.'
           ]
         },
-        { 
-          ...newsBase[1], 
-          id: 'n2', 
+        {
+          ...newsBase[1],
+          id: 'n2',
           title: 'Semicondutores: A Nova Geopolítica do Poder',
           keyPoints: [
             'China acelera produção doméstica de chips de 7nm.',
@@ -40,9 +40,9 @@ const NewsletterDetail: React.FC = () => {
             'Impacto direto no custo de servidores de nuvem para startups brasileiras.'
           ]
         },
-        { 
-          ...newsBase[2], 
-          id: 'n3', 
+        {
+          ...newsBase[2],
+          id: 'n3',
           title: 'Tokenização de Ativos Reais: O Fim dos Intermediários?',
           keyPoints: [
             'Imóveis fracionados via blockchain batem recorde de liquidez.',
@@ -50,9 +50,9 @@ const NewsletterDetail: React.FC = () => {
             'Redução de custos operacionais em transações cross-border.'
           ]
         },
-        { 
-          ...newsBase[3], 
-          id: 'n4', 
+        {
+          ...newsBase[3],
+          id: 'n4',
           title: 'Computação Quântica e a Quebra da Criptografia Atual',
           keyPoints: [
             'Google anuncia marco na correção de erros quânticos.',
@@ -68,14 +68,15 @@ const NewsletterDetail: React.FC = () => {
         date: '12 de Junho, 2024',
         coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
         synthesis: 'Compilado técnico dos vetores de disrupção que estão redefinindo as fronteiras da eficiência operacional nesta quinzena.',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Example PDF for visualization
         items: mockItems
       };
 
       setEdition(mockEdition);
-      
+
       const saved = JSON.parse(localStorage.getItem('saved_newsletters') || '[]');
       setIsSaved(saved.includes(id || 'current'));
-      
+
       setLoading(false);
     };
     loadNewsletter();
@@ -109,18 +110,18 @@ const NewsletterDetail: React.FC = () => {
   return (
     <div className="bg-white min-h-screen selection:bg-accent selection:text-white">
       <header className="relative h-[65vh] md:h-[75vh] lg:h-[80vh] overflow-hidden flex items-end">
-        <img 
-          src={edition.coverImage} 
-          className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.3]" 
+        <img
+          src={edition.coverImage}
+          className="absolute inset-0 w-full h-full object-cover grayscale brightness-[0.3]"
           alt="Capa"
           decoding="async"
         />
         {/* Ajuste do gradiente para base escura (preta) garantindo legibilidade absoluta */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-        
+
         <div className="container mx-auto px-6 md:px-12 lg:px-24 pb-12 md:pb-24 relative z-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 md:mb-16">
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="flex items-center gap-3 text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-white/90 hover:text-accent transition-colors group"
             >
@@ -128,23 +129,23 @@ const NewsletterDetail: React.FC = () => {
               Voltar ao Arquivo
             </button>
             <div className="flex gap-4">
-               <button 
-                 onClick={toggleSave}
-                 className={`px-6 md:px-8 py-3 rounded-full border border-white/20 backdrop-blur-md text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 ${isSaved ? 'bg-accent text-white border-accent' : 'bg-white/5 text-white hover:bg-white/10'}`}
-               >
-                 <svg className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                 {isSaved ? 'Salva' : 'Salvar Edição'}
-               </button>
-               <button 
-                 onClick={() => setIsShareModalOpen(true)}
-                 className="px-6 md:px-8 py-3 rounded-full bg-white/5 border border-white/20 backdrop-blur-md text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-3"
-               >
-                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                 Compartilhar
-               </button>
+              <button
+                onClick={toggleSave}
+                className={`px-6 md:px-8 py-3 rounded-full border border-white/20 backdrop-blur-md text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 ${isSaved ? 'bg-accent text-white border-accent' : 'bg-white/5 text-white hover:bg-white/10'}`}
+              >
+                <svg className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                {isSaved ? 'Salva' : 'Salvar Edição'}
+              </button>
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="px-6 md:px-8 py-3 rounded-full bg-white/5 border border-white/20 backdrop-blur-md text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all hover:bg-white/10 flex items-center gap-3"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                Compartilhar
+              </button>
             </div>
           </div>
-          
+
           <div className="max-w-5xl space-y-6 md:space-y-8">
             <span className="inline-block bg-accent text-white text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] px-6 py-2.5 md:px-8 md:py-3 rounded-full shadow-2xl">
               Newsletter Exclusiva
@@ -160,6 +161,32 @@ const NewsletterDetail: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {/* PDF Viewer Section */}
+      {edition.pdfUrl && (
+        <section className="bg-white relative z-20 -mt-12 md:-mt-20 mx-4 md:mx-12 lg:mx-24 mb-16 md:mb-32">
+          <div className="container mx-auto">
+            <div className="bg-white rounded-[2rem] p-4 md:p-8 shadow-2xl border-2 border-gray-100">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-accent flex items-center gap-3">
+                  <span className="w-2 h-2 bg-accent rounded-full animate-pulse"></span>
+                  Documento Original
+                </h2>
+                <a href={edition.pdfUrl} download target="_blank" rel="noreferrer" className="text-[9px] font-bold uppercase tracking-widest text-primary hover:text-accent transition-colors">
+                  Download PDF
+                </a>
+              </div>
+              <div className="w-full aspect-[4/5] md:aspect-[16/9] bg-lightGray rounded-[1.5rem] overflow-hidden relative group">
+                <iframe
+                  src={`${edition.pdfUrl}#toolbar=0`}
+                  className="w-full h-full"
+                  title="PDF Viewer"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="py-16 md:py-32 bg-lightGray/30 border-b border-gray-100">
         <div className="container mx-auto px-6 md:px-12 lg:px-24">
@@ -180,7 +207,7 @@ const NewsletterDetail: React.FC = () => {
                 <div className="absolute -left-4 md:-left-24 lg:-left-32 -top-12 md:-top-20 text-[80px] md:text-[150px] lg:text-[180px] font-serif font-black text-gray-100 -z-10 select-none leading-none pointer-events-none opacity-40 group-hover:text-accent/5 transition-colors duration-700">
                   {String(index + 1).padStart(2, '0')}
                 </div>
-                
+
                 <div className="space-y-8 md:space-y-12">
                   <div className="flex items-center justify-between border-b border-gray-50 pb-6 md:pb-8">
                     <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em] text-accent">
@@ -193,10 +220,10 @@ const NewsletterDetail: React.FC = () => {
                   </h3>
 
                   <div className="aspect-[16/9] md:aspect-[21/9] rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-xl md:shadow-2xl bg-lightGray relative gpu-accelerated">
-                    <img 
-                      src={item.imageUrl} 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" 
-                      alt={item.title} 
+                    <img
+                      src={item.imageUrl}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                      alt={item.title}
                       loading="lazy"
                       decoding="async"
                     />

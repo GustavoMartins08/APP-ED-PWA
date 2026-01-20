@@ -10,7 +10,7 @@ export interface NewsItem {
   timestamp: string;
   imageUrl: string;
   content?: string;
-  keyPoints?: string[]; 
+  keyPoints?: string[];
 }
 
 export interface User {
@@ -26,6 +26,7 @@ export interface NewsletterEdition {
   date: string;
   coverImage: string;
   synthesis: string;
+  pdfUrl?: string;
   items: NewsItem[];
 }
 

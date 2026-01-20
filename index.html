@@ -1,125 +1,168 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="overflow-x-hidden">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    <title>Empresário Digital | Inteligência de Mercado</title>
-    
-    <!-- Font Optimization -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,700;0,900;1,700;1,900&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              accent: '#ff2768',
-              body: '#ffffff',
-              primary: '#000000',
-              secondary: '#1a1a1a',
-              lightGray: '#f8f8f8'
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Empresário Digital | Inteligência de Mercado</title>
+
+  <!-- Font Optimization -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: '#ff2768',
+            body: '#ffffff',
+            primary: '#000000',
+            secondary: '#1a1a1a',
+            lightGray: '#f8f8f8'
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Archivo', 'sans-serif']
+          },
+          animation: {
+            'subtle-pulse': 'subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'loading-bar': 'loadingBar 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+            'scroll-line': 'scrollLine 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite',
+          },
+          keyframes: {
+            subtlePulse: {
+              '0%, 100%': { transform: 'scale3d(1, 1, 1)' },
+              '50%': { transform: 'scale3d(0.98, 0.98, 1)' },
             },
-            fontFamily: {
-              sans: ['Plus Jakarta Sans', 'sans-serif'],
-              serif: ['Archivo', 'sans-serif']
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translate3d(0, 20px, 0)' },
+              '100%': { opacity: '1', transform: 'translate3d(0, 0, 0)' },
             },
-            animation: {
-              'subtle-pulse': 'subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-              'loading-bar': 'loadingBar 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
-              'scroll-line': 'scrollLine 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite',
+            loadingBar: {
+              '0%': { transform: 'translate3d(-100%, 0, 0)' },
+              '100%': { transform: 'translate3d(400%, 0, 0)' }
             },
-            keyframes: {
-              subtlePulse: {
-                '0%, 100%': { transform: 'scale3d(1, 1, 1)' },
-                '50%': { transform: 'scale3d(0.98, 0.98, 1)' },
-              },
-              fadeIn: {
-                '0%': { opacity: '0', transform: 'translate3d(0, 20px, 0)' },
-                '100%': { opacity: '1', transform: 'translate3d(0, 0, 0)' },
-              },
-              loadingBar: {
-                '0%': { transform: 'translate3d(-100%, 0, 0)' },
-                '100%': { transform: 'translate3d(400%, 0, 0)' }
-              },
-              scrollLine: {
-                '0%': { transform: 'translateY(-100%)', opacity: '0' },
-                '30%': { opacity: '1' },
-                '60%': { opacity: '1' },
-                '100%': { transform: 'translateY(100%)', opacity: '0' }
-              }
+            scrollLine: {
+              '0%': { transform: 'translateY(-100%)', opacity: '0' },
+              '30%': { opacity: '1' },
+              '60%': { opacity: '1' },
+              '100%': { transform: 'translateY(100%)', opacity: '0' }
             }
           }
         }
       }
-    </script>
-    <style>
-      :root {
-        scroll-behavior: smooth;
-      }
-      body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #ffffff;
-        color: #000000;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        overflow-x: hidden;
-        width: 100%;
-      }
-      
-      /* Hardware Acceleration & Performance Layers */
-      .gpu-accelerated {
-        transform: translate3d(0, 0, 0);
-        backface-visibility: hidden;
-        perspective: 1000px;
-        will-change: transform;
-      }
+    }
+  </script>
+  <style>
+    :root {
+      scroll-behavior: smooth;
+    }
 
-      .will-change-transform { will-change: transform; }
-      .will-change-opacity { will-change: opacity; }
-      .will-change-composite { will-change: transform, opacity; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      background-color: #ffffff;
+      color: #000000;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+      width: 100%;
+    }
 
-      /* Melhoria de legibilidade e performance de renderização de fontes */
-      .font-serif {
-        font-family: 'Archivo', sans-serif;
-        letter-spacing: -0.04em;
-      }
-      
-      :focus-visible {
-        outline: 3px solid #ff2768;
-        outline-offset: 4px;
-      }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: 'Archivo', serif;
+    }
 
-      /* Scrollbar */
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-      ::-webkit-scrollbar-thumb:hover { background: #ff2768; }
-      
-      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      .scrollbar-hide::-webkit-scrollbar { display: none; }
+    /* Hardware Acceleration & Performance Layers */
+    .gpu-accelerated {
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+      will-change: transform;
+    }
 
-      /* Performance: Prevenir Layout Thrashing em imagens com filtros */
-      img {
-        transition: filter 0.5s ease-out, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        content-visibility: auto;
-      }
+    .will-change-transform {
+      will-change: transform;
+    }
 
-      /* Redução de Motion para acessibilidade e performance em dispositivos lentos */
-      @media (prefers-reduced-motion: reduce) {
-        * {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-          scroll-behavior: auto !important;
-        }
+    .will-change-opacity {
+      will-change: opacity;
+    }
+
+    .will-change-composite {
+      will-change: transform, opacity;
+    }
+
+    /* Melhoria de legibilidade e performance de renderização de fontes */
+    .font-serif {
+      font-family: 'Archivo', sans-serif !important;
+      letter-spacing: -0.04em;
+    }
+
+    .font-sans {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    :focus-visible {
+      outline: 3px solid #ff2768;
+      outline-offset: 4px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ff2768;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Performance: Prevenir Layout Thrashing em imagens com filtros */
+    img {
+      transition: filter 0.5s ease-out, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      content-visibility: auto;
+    }
+
+    /* Redução de Motion para acessibilidade e performance em dispositivos lentos */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
       }
-    </style>
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -130,10 +173,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="overflow-x-hidden">
-    <div id="root"></div>
+
+<body class="overflow-x-hidden">
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
