@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { fetchLatestNews } from '../lib/mcpClient';
+import { fetchLatestNews } from '../lib/supabaseClient';
 import { NewsItem } from '../types';
 import ShareModal from '../components/ShareModal';
 
@@ -13,7 +13,7 @@ const ArticleDetail: React.FC = () => {
   const [showFloatingBack, setShowFloatingBack] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  
+
   const scrollRafId = useRef<number | null>(null);
 
   const author = {
@@ -27,7 +27,7 @@ const ArticleDetail: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (scrollRafId.current) cancelAnimationFrame(scrollRafId.current);
-      
+
       scrollRafId.current = requestAnimationFrame(() => {
         setShowFloatingBack(window.scrollY > 400);
       });
@@ -45,7 +45,7 @@ const ArticleDetail: React.FC = () => {
       window.scrollTo(0, 0);
       const all = await fetchLatestNews();
       const found = all.find(a => a.id === id);
-      
+
       if (found) {
         setArticle(found);
         const saved = JSON.parse(localStorage.getItem('saved_articles') || '[]');
@@ -76,7 +76,7 @@ const ArticleDetail: React.FC = () => {
 
   return (
     <article className="bg-white relative overflow-hidden pb-32" role="main">
-      <button 
+      <button
         onClick={() => navigate(-1)}
         className={`fixed left-6 md:left-12 top-32 z-50 bg-white/95 backdrop-blur-xl border border-gray-100 p-5 rounded-full shadow-2xl transition-[transform,opacity] duration-500 hover:bg-accent hover:text-white group gpu-accelerated ${showFloatingBack ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-12 pointer-events-none'}`}
       >
@@ -85,7 +85,7 @@ const ArticleDetail: React.FC = () => {
 
       <div className="container mx-auto px-8 md:px-16 lg:px-32 xl:px-48 py-12 md:py-24">
         <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
-          
+
           <div className="flex items-center justify-between">
             <button onClick={() => navigate(-1)} className="text-[13px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-accent transition-colors flex items-center gap-4">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
@@ -106,14 +106,14 @@ const ArticleDetail: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-4">
-              <button 
-                onClick={toggleSave} 
+              <button
+                onClick={toggleSave}
                 className={`flex-grow sm:flex-grow-0 px-8 py-4 rounded-full border-2 text-[10px] md:text-[12px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 ${isSaved ? 'bg-accent border-accent text-white shadow-xl' : 'border-primary/10 text-primary hover:border-accent hover:text-accent'}`}
               >
                 <svg className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                 {isSaved ? 'No Acervo' : 'Salvar Relatório'}
               </button>
-              <button 
+              <button
                 onClick={() => setIsShareModalOpen(true)}
                 className="flex-grow sm:flex-grow-0 px-8 py-4 rounded-full border-2 border-primary/10 text-primary hover:border-accent hover:text-accent text-[10px] md:text-[12px] font-black uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3"
               >
@@ -122,11 +122,11 @@ const ArticleDetail: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="aspect-video rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-2xl bg-lightGray gpu-accelerated">
-            <img 
-              src={article.imageUrl} 
-              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-[filter,transform] duration-1000" 
+            <img
+              src={article.imageUrl}
+              className="w-full h-full object-cover grayscale hover:grayscale-0 transition-[filter,transform] duration-1000"
               alt={article.title}
               decoding="async"
             />
@@ -137,7 +137,7 @@ const ArticleDetail: React.FC = () => {
               <p className="editorial-drop-cap italic font-normal text-primary opacity-90 mb-16">
                 {article.excerpt}
               </p>
-              
+
               <div className="space-y-10 opacity-80">
                 <p>
                   O cenário macroeconômico global exige, hoje, mais do que simples adaptação; exige uma reconfiguração completa do DNA organizacional. Enquanto modelos tradicionais de gestão se mostram obsoletos diante da velocidade da inteligência artificial, líderes visionários estão utilizando dados sintetizados para antecipar movimentos de mercado antes mesmo que eles se consolidem.
@@ -152,9 +152,9 @@ const ArticleDetail: React.FC = () => {
             </div>
 
             <section className="mt-32 pt-24 border-t border-gray-100 flex flex-col md:flex-row gap-12 items-center text-center md:text-left">
-              <img 
-                src={author.avatarUrl} 
-                className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover grayscale shadow-xl gpu-accelerated" 
+              <img
+                src={author.avatarUrl}
+                className="w-32 h-32 md:w-48 md:h-48 rounded-full object-cover grayscale shadow-xl gpu-accelerated"
                 alt={author.name}
                 loading="lazy"
                 decoding="async"

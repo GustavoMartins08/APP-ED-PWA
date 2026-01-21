@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SectionHeader from '../components/SectionHeader';
-import { fetchEditorials } from '../lib/mcpClient';
+import { fetchEditorials } from '../lib/supabaseClient';
 import { Editorial } from '../types';
 import ShareModal from '../components/ShareModal';
 

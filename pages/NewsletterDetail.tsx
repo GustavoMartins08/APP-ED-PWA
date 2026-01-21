@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchLatestNews } from '../lib/mcpClient';
+import { fetchLatestNews } from '../lib/supabaseClient';
 import { NewsletterEdition, NewsItem } from '../types';
 import NewsletterForm from '../components/NewsletterForm';
 import ShareModal from '../components/ShareModal';

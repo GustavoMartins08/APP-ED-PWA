@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import SectionHeader from '../components/SectionHeader';
-import { fetchColumns, fetchLatestNews } from '../lib/mcpClient';
+import { fetchColumns, fetchLatestNews } from '../lib/supabaseClient';
 import { Columnist, NewsItem } from '../types';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ShareModal from '../components/ShareModal';
@@ -28,18 +28,18 @@ const ColumnsPage: React.FC = () => {
         fetchColumns(),
         fetchLatestNews()
       ]);
-      
+
       setUniqueColumnists(colData);
       setColumnists([...colData, ...colData, ...colData, ...colData]);
-      
+
       const opinionColumns = newsData.map((item, idx) => ({
         ...item,
         category: 'Artigo de Opinião',
         author: colData[idx % colData.length]
       }));
-      
+
       setColumns(opinionColumns);
-      
+
       const authorParam = searchParams.get('author');
       if (authorParam) {
         setActiveColumnist(authorParam);
@@ -47,7 +47,7 @@ const ColumnsPage: React.FC = () => {
 
       const saved = JSON.parse(localStorage.getItem('saved_articles') || '[]');
       setSavedArticles(saved);
-      
+
       setLoading(false);
     };
     loadData();
@@ -64,7 +64,7 @@ const ColumnsPage: React.FC = () => {
     const newSaved = savedArticles.includes(id)
       ? savedArticles.filter(sid => sid !== id)
       : [...savedArticles, id];
-    
+
     setSavedArticles(newSaved);
     localStorage.setItem('saved_articles', JSON.stringify(newSaved));
   };
@@ -112,21 +112,21 @@ const ColumnsPage: React.FC = () => {
     <div className="bg-white min-h-screen selection:bg-accent selection:text-white">
       <section className="pt-16 md:pt-32 pb-8 md:pb-16 overflow-hidden">
         <div className="container mx-auto px-6 md:px-16 lg:px-24">
-          <SectionHeader 
-            title="Colunistas" 
+          <SectionHeader
+            title="Colunistas"
             subtitle="As mentes que moldam o ecossistema digital."
           />
-          
+
           <div className="relative mt-12 md:mt-24 group">
             <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none z-20 px-4 md:-mx-12">
-              <button 
+              <button
                 onClick={() => handleScroll('left')}
                 className="pointer-events-auto w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur-sm border border-gray-100 rounded-full flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0"
                 aria-label="Anterior"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <button 
+              <button
                 onClick={() => handleScroll('right')}
                 className="pointer-events-auto w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur-sm border border-gray-100 rounded-full flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0"
                 aria-label="Próximo"
@@ -135,20 +135,20 @@ const ColumnsPage: React.FC = () => {
               </button>
             </div>
 
-            <div 
+            <div
               ref={scrollRef}
               className="flex gap-10 md:gap-20 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth -mx-6 px-6 md:-mx-4 md:px-4"
             >
               {columnists.map((col, idx) => (
-                <div 
-                  key={`${col.id}-${idx}`} 
+                <div
+                  key={`${col.id}-${idx}`}
                   className={`flex flex-col items-center text-center shrink-0 w-28 md:w-44 snap-center group cursor-pointer transition-all duration-500 ${activeColumnist === col.name ? 'scale-110' : ''}`}
                   onClick={() => selectColumnist(col.name)}
                 >
                   <div className="relative mb-6 md:mb-8 transition-transform duration-500 group-hover:scale-105">
-                    <img 
-                      src={col.avatarUrl} 
-                      alt={col.name} 
+                    <img
+                      src={col.avatarUrl}
+                      alt={col.name}
                       className={`w-24 h-24 md:w-40 md:h-40 rounded-full object-cover grayscale transition-all duration-700 ring-1 ring-gray-100 ${activeColumnist === col.name ? 'grayscale-0 ring-accent ring-4 opacity-100' : 'opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:ring-accent/20'}`}
                     />
                   </div>
@@ -178,9 +178,8 @@ const ColumnsPage: React.FC = () => {
         <nav className="flex gap-3 overflow-x-auto pb-8 mb-16 scrollbar-hide border-b border-gray-50">
           <button
             onClick={() => selectColumnist('Todos')}
-            className={`whitespace-nowrap px-8 py-3 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] transition-all ${
-              activeColumnist === 'Todos' ? 'bg-primary text-white shadow-xl' : 'bg-lightGray text-secondary hover:bg-gray-200'
-            }`}
+            className={`whitespace-nowrap px-8 py-3 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] transition-all ${activeColumnist === 'Todos' ? 'bg-primary text-white shadow-xl' : 'bg-lightGray text-secondary hover:bg-gray-200'
+              }`}
           >
             Todos os Autores
           </button>
@@ -188,9 +187,8 @@ const ColumnsPage: React.FC = () => {
             <button
               key={col.id}
               onClick={() => selectColumnist(col.name)}
-              className={`whitespace-nowrap px-8 py-3 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] transition-all ${
-                activeColumnist === col.name ? 'bg-accent text-white shadow-xl shadow-accent/20' : 'bg-lightGray text-secondary hover:bg-gray-200'
-              }`}
+              className={`whitespace-nowrap px-8 py-3 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] transition-all ${activeColumnist === col.name ? 'bg-accent text-white shadow-xl shadow-accent/20' : 'bg-lightGray text-secondary hover:bg-gray-200'
+                }`}
             >
               {col.name}
             </button>
@@ -203,18 +201,18 @@ const ColumnsPage: React.FC = () => {
               const author = (column as any).author as Columnist;
               const isSaved = savedArticles.includes(column.id);
               return (
-                <div 
-                  key={column.id} 
+                <div
+                  key={column.id}
                   className="group flex flex-col h-full bg-white rounded-[2rem] md:rounded-[3rem] border border-gray-50 hover:border-accent/10 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-700 p-8 md:p-12 animate-fade-in relative"
                 >
                   <div className="absolute top-10 right-10 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
-                    <button 
+                    <button
                       onClick={(e) => toggleSave(e, column.id)}
                       className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all ${isSaved ? 'bg-accent border-accent text-white' : 'border-gray-200 text-gray-400 hover:text-accent hover:border-accent'}`}
                     >
                       <svg className="w-3.5 h-3.5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => openShare(e, column)}
                       className="w-9 h-9 rounded-full border border-gray-200 text-gray-400 hover:text-accent hover:border-accent flex items-center justify-center transition-all"
                     >
@@ -248,7 +246,7 @@ const ColumnsPage: React.FC = () => {
                     <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">
                       {column.timestamp}
                     </span>
-                    <button 
+                    <button
                       onClick={() => navigate(`/artigo/${column.id}`)}
                       className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-primary group-hover:text-accent transition-all"
                     >
@@ -269,7 +267,7 @@ const ColumnsPage: React.FC = () => {
         </div>
 
         <div className="mt-20 md:mt-40 text-center">
-          <button 
+          <button
             onClick={() => selectColumnist('Todos')}
             className="bg-primary text-white px-12 py-6 rounded-full text-[11px] font-black uppercase tracking-[0.4em] hover:bg-accent transition-all shadow-xl active:scale-95"
           >
@@ -277,11 +275,11 @@ const ColumnsPage: React.FC = () => {
           </button>
         </div>
       </section>
-      <ShareModal 
-        isOpen={shareData.isOpen} 
-        onClose={() => setShareData({ ...shareData, isOpen: false })} 
-        url={shareData.url} 
-        title={shareData.title} 
+      <ShareModal
+        isOpen={shareData.isOpen}
+        onClose={() => setShareData({ ...shareData, isOpen: false })}
+        url={shareData.url}
+        title={shareData.title}
       />
     </div>
   );

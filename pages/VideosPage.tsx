@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import SectionHeader from '../components/SectionHeader';
-import { fetchVideos } from '../lib/mcpClient';
+import { fetchVideos } from '../lib/supabaseClient';
 import { Video } from '../types';
 import ShareModal from '../components/ShareModal';
 

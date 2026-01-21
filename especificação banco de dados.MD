@@ -1,4 +1,10 @@
-# Especificação de Banco de Dados - Empresário Digital
+# Especificação de Banco de Dados - Empresário Digital (IMPLEMENTADO)
+
+STATUS: **IMPLEMENTADO**
+Última Atualização: 20 de Janeiro de 2026
+
+Este documento detalha a estrutura de banco de dados **já implementada** no Supabase para suportar 100% das funcionalidades da aplicação React "Empresário Digital".
+
 
 Este documento detalha a estrutura de banco de dados necessária para suportar 100% das funcionalidades, interfaces e dados simulados (mocks) atualmente presentes na aplicação React "Empresário Digital". A implementação deve ser realizada no Supabase (PostgreSQL).
 
@@ -57,6 +63,7 @@ Tabela central para todo conteúdo textual (Notícias Rápidas e Colunas).
 | `published_at` | `timestamptz` | Sim | Data de publicação. Usado para ordenação "Mais Recentes". |
 | `key_points` | `jsonb` | Não | Array de strings. Lista de destaques (`<ul>` no `NewsCard`). |
 | `is_premium` | `boolean` | Sim | Default: `false`. Se true, bloqueia conteúdo para users free. |
+| `visibility` | `text` | Sim | Default: `'public'`. Opções: `'public'` (frente do site), `'hidden'` (exclusivo newsletter/link). |
 
 ### 2.4. `public.videos` (Vídeos)
 Conteúdo audiovisual.
@@ -152,16 +159,110 @@ Assinantes da newsletter (pode ser integrado com provedor externo, mas bom mante
 | `last_name` | `text` | Não | |
 | `active` | `boolean` | Sim | Default: true. |
 
-## 3. Políticas de Segurança (RLS - Row Level Security)
+## 3. Políticas de Segurança (RLS) - Implementação Técnica
 
-Para garantir segurança total:
+As seguintes políticas Row Level Security (RLS) foram aplicadas e estão ativas. O frontend deve estar ciente dessas regras para evitar erros de permissão.
 
-1.  **Leitura Pública**: Tabelas `news_items`, `videos`, `editorials`, `columnists`, `newsletters` (metadados) devem ter política `ENABLE SELECT FOR PUBLIC`.
-    *   *Refinamento*: Se `is_premium` for true em `news_items`, a política deve checar se `auth.uid()` existe na tabela `profiles` com `subscription_status = 'premium'` (ou restringir via API/Edge Function para performance).
-2.  **Dados de Usuário**: `profiles`, `saved_items` apenas acessíveis pelo próprio usuário (`auth.uid() = user_id`).
-3.  **Leads (Escrita)**: `advertiser_inquiries` e `newsletter_subscriptions` devem permitir `INSERT` público (anônimo), mas `SELECT` apenas para admins.
+### 3.1. Acesso Público (Leitura)
+As seguintes tabelas possuem política `ENABLE SELECT FOR PUBLIC` (qualquer usuário, inclusive não logado, pode ler):
+- `videos`
+- `editorials`
+- `columnists`
+- `newsletters`
+- `newsletter_items`
 
-## 4. Mapeamento de Dados Mockados para DB
+### 3.2. Conteúdo Misto (News Items)
+A tabela `news_items` possui políticas condicionais:
+- **Público**: Pode ler qualquer item onde `is_premium = false`.
+- **Premium**: Para ler itens com `is_premium = true`, o usuário deve estar autenticado E possuir `subscription_status = 'premium'` na tabela `profiles`.
+
+### 3.3. Dados do Usuário (Profiles & Saved Items)
+- **Profiles**:
+    - `SELECT`: Usuário só vê o próprio perfil (`auth.uid() = id`).
+    - `UPDATE`: Usuário só edita o próprio perfil.
+    - `INSERT`: Usuário só cria o próprio perfil (geralmente via trigger de Auth, mas permissão existe).
+- **Saved Items**:
+    - Totalmente restrito ao dono do registro (`auth.uid() = user_id`). Frontend deve sempre filtrar queries por user_id, embora o RLS force isso.
+
+### 3.4. Administração e Leads (Escrita Pública, Leitura Restrita)
+Tabelas `advertiser_inquiries` e `newsletter_subscriptions`:
+- **INSERT**: `true` (Público). Qualquer visitante pode enviar um lead.
+- **SELECT**: Restrito. Apenas usuários com `role = 'admin'` na tabela `profiles` ou `service_role` podem ler.
+
+---
+
+## 4. Guia de Integração (Frontend Admin & PWA)
+
+### 4.1. Definição de Admin
+Para acessar o Painel de Controle (Admin), o usuário deve ter o campo `role` definido como `'admin'` na tabela `profiles`.
+**Como promover um usuário:**
+Via SQL Editor no Supabase Dashboard:
+```sql
+UPDATE public.profiles SET role = 'admin' WHERE email = 'seu_email@exemplo.com';
+```
+
+### 4.2. Tipos TypeScript (Sugestão para `src/types.ts`)
+
+```typescript
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          role: 'admin' | 'subscriber' | 'editor'
+          subscription_status: 'free' | 'premium'
+          created_at: string
+        }
+      }
+      news_items: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          excerpt: string
+          content: string | null
+          category: string
+          source: string
+          image_url: string | null
+          author_id: string | null
+          published_at: string
+          key_points: Json | null
+          is_premium: boolean
+        }
+      }
+      // ... mapear outras tabelas conforme colunas acima
+    }
+  }
+}
+```
+
+### 4.3. Conectando no Frontend
+
+Para listagens públicas (ex: Feed de Notícias):
+```typescript
+const { data, error } = await supabase
+  .from('news_items')
+  .select('*, columnists(name, avatar_url)')
+  .order('published_at', { ascending: false });
+```
+
+Para área administrativa (Ler Leads):
+*Certifique-se de estar logado com um usuário admin.*
+```typescript
+const { data, error } = await supabase
+  .from('advertiser_inquiries')
+  .select('*')
+  .order('created_at', { ascending: false });
+```
+Se retornar array vazio sem erro, o usuário logado provavelment não tem `role = 'admin'`.
+
+## 5. Mapeamento de Dados Mockados para DB
 
 Para migrar os dados atuais em `mcpClient.ts` para o banco:
 

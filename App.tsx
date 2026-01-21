@@ -2,6 +2,8 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import ReloadPrompt from './components/ReloadPrompt';
+
 import Home from './pages/Home';
 import LatestNews from './pages/LatestNews';
 import ArticleDetail from './pages/ArticleDetail';
@@ -19,6 +21,7 @@ import SubscribePremium from './pages/SubscribePremium';
 const App: React.FC = () => {
   return (
     <Router>
+      <ReloadPrompt />
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />

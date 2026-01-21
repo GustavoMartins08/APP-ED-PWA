@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import NewsCard from '../components/NewsCard';
 import SectionHeader from '../components/SectionHeader';
-import { fetchLatestNews } from '../lib/mcpClient';
+import { fetchLatestNews } from '../lib/supabaseClient';
 import { NewsItem } from '../types';
 
 const ITEMS_PER_PAGE = 4;
@@ -123,8 +123,8 @@ const LatestNews: React.FC = () => {
                   key={p}
                   onClick={() => handlePageChange(p)}
                   className={`w-10 h-10 md:w-14 md:h-14 font-serif text-lg md:text-2xl font-black rounded-xl transition-all ${currentPage === p
-                      ? 'bg-primary text-white scale-110 shadow-xl'
-                      : 'text-gray-300 hover:text-primary hover:bg-lightGray'
+                    ? 'bg-primary text-white scale-110 shadow-xl'
+                    : 'text-gray-300 hover:text-primary hover:bg-lightGray'
                     }`}
                 >
                   {p}

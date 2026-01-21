@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SectionHeader from '../components/SectionHeader';
 import NewsCard from '../components/NewsCard';
-import { fetchNewsByIds } from '../lib/mcpClient';
+import { fetchNewsByIds } from '../lib/supabaseClient';
 import { NewsItem, User } from '../types';
 
 const ProfilePage: React.FC = () => {
@@ -19,7 +19,7 @@ const ProfilePage: React.FC = () => {
       return;
     }
     setUser(JSON.parse(authUser));
-    
+
     const loadSaved = async () => {
       const savedIds = JSON.parse(localStorage.getItem('saved_articles') || '[]');
       if (savedIds.length > 0) {
@@ -64,8 +64,8 @@ const ProfilePage: React.FC = () => {
                 </p>
               </div>
             </div>
-            
-            <button 
+
+            <button
               onClick={handleLogout}
               className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-accent border-b-2 border-gray-100 hover:border-accent transition-all pb-2 mb-2"
             >
@@ -77,8 +77,8 @@ const ProfilePage: React.FC = () => {
 
       {/* Saved Content */}
       <section className="py-20 md:py-32 container mx-auto px-6 md:px-16 lg:px-24">
-        <SectionHeader 
-          title="Meu Acervo" 
+        <SectionHeader
+          title="Meu Acervo"
           subtitle="Seus artigos salvos para consulta tática e revisão estratégica."
         />
 
@@ -93,7 +93,7 @@ const ProfilePage: React.FC = () => {
         ) : (
           <div className="py-20 md:py-40 text-center border-2 border-dashed border-gray-100 rounded-[3rem] mt-16 md:mt-24">
             <p className="text-gray-400 text-sm font-black uppercase tracking-[0.4em] mb-8">Você ainda não salvou relatórios no seu acervo.</p>
-            <button 
+            <button
               onClick={() => navigate('/ultimas-noticias')}
               className="bg-primary text-white px-10 py-5 rounded-full text-[11px] font-black uppercase tracking-[0.3em] hover:bg-accent transition-all"
             >

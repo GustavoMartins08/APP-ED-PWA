@@ -5,7 +5,7 @@ import NewsCard from '../components/NewsCard';
 import NewsletterForm from '../components/NewsletterForm';
 import HeroCarousel from '../components/HeroCarousel';
 import ScrollLineDivider from '../components/ScrollLineDivider';
-import { fetchLatestNews, fetchEditorials, fetchVideos } from '../lib/mcpClient';
+import { fetchLatestNews, fetchEditorials, fetchVideos } from '../lib/supabaseClient';
 import { NewsItem, Editorial, Video } from '../types';
 import { useNavigate } from 'react-router-dom';
 import ShareModal from '../components/ShareModal';
