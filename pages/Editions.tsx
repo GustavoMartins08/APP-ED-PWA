@@ -62,7 +62,7 @@ const Editions: React.FC = () => {
         subtitle="Análises verticais profundas sobre os pilares que sustentam a economia digital global."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-20 mt-16 md:mt-24">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 md:gap-20 mt-16 md:mt-24">
         {editorials.length > 0 ? (
           editorials.map(ed => {
             const isSaved = savedEditions.includes(ed.id);

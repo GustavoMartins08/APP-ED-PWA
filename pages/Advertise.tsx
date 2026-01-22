@@ -21,7 +21,7 @@ const Advertise: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
-    
+
     try {
       const result = await saveAdvertiserInquiry(formData);
       if (result.success) {
@@ -45,7 +45,7 @@ const Advertise: React.FC = () => {
       <section className="pt-16 md:pt-48 pb-12 md:pb-32 container mx-auto px-6 md:px-16 lg:px-24">
         <div className="max-w-5xl">
           <span className="text-accent text-[9px] md:text-[12px] font-black uppercase tracking-[0.6em] mb-6 md:mb-8 block">Parcerias Estratégicas</span>
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-8xl lg:text-9xl font-black text-primary uppercase leading-[0.9] md:leading-[0.85] tracking-tighter mb-8 md:mb-12">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-primary uppercase leading-[0.9] md:leading-[0.85] tracking-tighter mb-8 md:mb-12">
             Sua Marca no <br className="hidden md:block" /> <span className="italic text-accent">Epicentro</span> das Decisões.
           </h1>
           <p className="text-secondary text-base md:text-3xl font-light leading-relaxed italic opacity-70 max-w-3xl">
@@ -55,7 +55,7 @@ const Advertise: React.FC = () => {
       </section>
 
       {/* 2. STATS SECTION */}
-      <section className="bg-primary py-20 md:py-40 -mx-6 px-6 md:-mx-16 md:px-16 lg:-mx-24 lg:px-24 mb-20 md:mb-32 overflow-hidden relative">
+      <section className="bg-primary py-20 md:py-40 px-6 md:px-16 lg:px-24 mb-20 md:mb-32 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-accent/10 rounded-full blur-[80px] md:blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
         <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-32 relative z-10">
           <div className="space-y-2 md:space-y-4">
@@ -83,7 +83,7 @@ const Advertise: React.FC = () => {
                 Preencha as credenciais corporativas ao lado para receber nosso Media Kit 2024 e uma proposta personalizada.
               </p>
             </div>
-            
+
             <div className="space-y-6 md:space-y-8 pt-8 border-t border-gray-100">
               <div>
                 <span className="block text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-gray-300 mb-1 md:mb-2">E-mail Direto</span>
@@ -111,24 +111,24 @@ const Advertise: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-12 mb-6 md:mb-8">
                   <div className="space-y-1">
                     <label className={labelClasses}>Nome</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: João" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: João"
+                      className={inputClasses}
                       value={formData.firstName}
-                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className={labelClasses}>Sobrenome</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: Silva" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: Silva"
+                      className={inputClasses}
                       value={formData.lastName}
-                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     />
                   </div>
                 </div>
@@ -136,46 +136,46 @@ const Advertise: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-12 mb-6 md:mb-8">
                   <div className="space-y-1">
                     <label className={labelClasses}>Cargo</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: CEO, Diretor" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: CEO, Diretor"
+                      className={inputClasses}
                       value={formData.jobTitle}
-                      onChange={(e) => setFormData({...formData, jobTitle: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className={labelClasses}>Empresa</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: Nexus Corp" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: Nexus Corp"
+                      className={inputClasses}
                       value={formData.company}
-                      onChange={(e) => setFormData({...formData, company: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     />
                   </div>
                 </div>
 
                 <div className="mb-8 md:mb-12">
                   <label className={labelClasses}>E-mail que deseja ser contatado</label>
-                  <input 
-                    required 
-                    type="email" 
-                    placeholder="voce@empresa.com.br" 
-                    className={inputClasses} 
+                  <input
+                    required
+                    type="email"
+                    placeholder="voce@empresa.com.br"
+                    className={inputClasses}
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
 
                 <div className="mb-8 md:mb-12">
                   <label className={labelClasses}>Área de Interesse</label>
-                  <select 
+                  <select
                     className={inputClasses}
                     value={formData.interestArea}
-                    onChange={(e) => setFormData({...formData, interestArea: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, interestArea: e.target.value })}
                   >
                     <option>Branded Content</option>
                     <option>Display Premium</option>
@@ -187,21 +187,20 @@ const Advertise: React.FC = () => {
 
                 <div className="mb-10 md:mb-16">
                   <label className={labelClasses}>Briefing Adicional (Opcional)</label>
-                  <textarea 
+                  <textarea
                     rows={3}
-                    placeholder="Conte-nos brevemente..." 
+                    placeholder="Conte-nos brevemente..."
                     className={`${inputClasses} resize-none`}
                     value={formData.message}
-                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   />
                 </div>
 
-                <button 
+                <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className={`w-full bg-primary text-white font-black uppercase tracking-[0.4em] py-5 md:py-8 rounded-xl md:rounded-2xl text-[10px] md:text-[13px] transition-all flex items-center justify-center gap-4 ${
-                    status === 'loading' ? 'opacity-50 cursor-wait' : 'hover:bg-accent hover:scale-[1.01] active:scale-95 shadow-2xl shadow-primary/10'
-                  }`}
+                  className={`w-full bg-primary text-white font-black uppercase tracking-[0.4em] py-5 md:py-8 rounded-xl md:rounded-2xl text-[10px] md:text-[13px] transition-all flex items-center justify-center gap-4 ${status === 'loading' ? 'opacity-50 cursor-wait' : 'hover:bg-accent hover:scale-[1.01] active:scale-95 shadow-2xl shadow-primary/10'
+                    }`}
                 >
                   {status === 'loading' ? 'Transmitindo...' : 'Solicitar Proposta'}
                   <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>

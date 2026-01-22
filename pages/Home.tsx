@@ -232,7 +232,7 @@ const Home: React.FC = () => {
           >
             {newsletters.length > 0 ? (
               newsletters.map((nl, idx) => (
-                <div key={nl.id} className="min-w-[85vw] md:min-w-[500px] snap-start snap-always">
+                <div key={nl.id} className="w-[85vw] md:w-[500px] shrink-0 snap-start snap-always">
                   <NewsCard item={nl} index={idx} />
                 </div>
               ))
@@ -301,7 +301,7 @@ const Home: React.FC = () => {
                 editorials.map((ed, idx) => (
                   <div
                     key={ed.id}
-                    className="min-w-[300px] md:min-w-[450px] snap-start snap-always group cursor-pointer"
+                    className="w-[300px] md:w-[380px] shrink-0 snap-start snap-always group cursor-pointer"
                     onClick={() => navigate(`/newsletter/${ed.id}`)}
                   >
                     <div className="aspect-[3/4] rounded-[3rem] md:rounded-[5rem] overflow-hidden shadow-2xl mb-12 relative bg-white border border-gray-100">
@@ -453,7 +453,7 @@ const Home: React.FC = () => {
           <div className="flex flex-col lg:flex-row items-stretch">
             <div className="lg:w-[60%] p-10 md:p-16 xl:p-20 space-y-12 flex flex-col justify-center relative z-10">
               <div className="space-y-8">
-                <h2 className="font-serif text-3xl md:text-7xl xl:text-8xl font-black text-white uppercase leading-[0.95] tracking-tighter">
+                <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase leading-[0.85] tracking-tighter">
                   Assine a <br />
                   <span className="text-accent block mt-2">Inteligência</span>.
                 </h2>

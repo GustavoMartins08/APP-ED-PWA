@@ -12,7 +12,7 @@ const AboutUs: React.FC = () => {
       <section className="pt-24 md:pt-48 pb-20 md:pb-40 container mx-auto px-6 md:px-16 lg:px-24">
         <div className="max-w-6xl">
           <span className="text-accent text-[11px] md:text-[14px] font-black uppercase tracking-[0.8em] mb-10 block animate-fade-in">Manifesto Editorial</span>
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-primary uppercase leading-[0.85] tracking-tighter mb-12 md:mb-20 animate-fade-in will-change-composite">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-primary uppercase leading-[0.85] tracking-tighter mb-12 md:mb-20 animate-fade-in will-change-composite">
             Sintetizar o <span className="text-accent italic">Ruído</span>, <br />
             Potencializar a <span className="border-b-4 md:border-b-8 border-accent">Visão</span>.
           </h1>
@@ -61,13 +61,13 @@ const AboutUs: React.FC = () => {
       <section className="container mx-auto px-6 md:px-12 lg:px-24 py-32 md:py-56 text-center">
         <h2 className="font-serif text-4xl md:text-7xl font-black text-primary uppercase tracking-tighter mb-12">Pronto para o <span className="text-accent italic">Próximo Nível?</span></h2>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-          <button 
+          <button
             onClick={() => navigate('/newsletters')}
             className="w-full sm:w-auto bg-accent text-white px-12 py-6 rounded-full text-[11px] font-black uppercase tracking-[0.4em] hover:bg-primary transition-all shadow-xl active:scale-95"
           >
             Assinar Inteligência Premium
           </button>
-          <button 
+          <button
             onClick={() => navigate('/contact')}
             className="w-full sm:w-auto border-2 border-primary text-primary px-12 py-6 rounded-full text-[11px] font-black uppercase tracking-[0.4em] hover:bg-primary hover:text-white transition-all active:scale-95"
           >

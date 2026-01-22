@@ -67,8 +67,8 @@ const Newsletters: React.FC = () => {
     setTimeout(() => setLoading(false), 800);
   }, []);
 
-  const filteredNewsletters = activeFilter === 'Todos' 
-    ? newsletters 
+  const filteredNewsletters = activeFilter === 'Todos'
+    ? newsletters
     : newsletters.filter(n => n.category === activeFilter);
 
   if (loading) {
@@ -84,8 +84,8 @@ const Newsletters: React.FC = () => {
   return (
     <div className="pb-32 pt-16 md:pt-24">
       <div className="container mx-auto px-6 md:px-12 lg:px-24">
-        <SectionHeader 
-          title="Arquivo de Newsletters" 
+        <SectionHeader
+          title="Arquivo de Newsletters"
           subtitle="Newsletters estratégicas preservadas para consulta tática. Explore as edições recentes antes de assinar nosso terminal premium."
         />
 
@@ -94,11 +94,10 @@ const Newsletters: React.FC = () => {
             <button
               key={f}
               onClick={() => setActiveFilter(f)}
-              className={`whitespace-nowrap px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all ${
-                activeFilter === f 
-                ? 'bg-accent text-white shadow-xl shadow-accent/20' 
-                : 'bg-lightGray text-secondary hover:bg-gray-200'
-              }`}
+              className={`whitespace-nowrap px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all ${activeFilter === f
+                  ? 'bg-accent text-white shadow-xl shadow-accent/20'
+                  : 'bg-lightGray text-secondary hover:bg-gray-200'
+                }`}
             >
               {f}
             </button>
@@ -170,7 +169,7 @@ const NewsletterCard: React.FC<{ nl: NewsletterSummary }> = ({ nl }) => {
 
   return (
     <div className="relative group">
-      <Link 
+      <Link
         to={`/newsletter/${nl.id}`}
         className="flex flex-col md:flex-row gap-8 md:gap-16 p-8 md:p-14 rounded-[2.5rem] bg-lightGray/30 border border-gray-50 hover:bg-white hover:shadow-2xl hover:border-accent/10 transition-all duration-500"
       >
@@ -189,14 +188,14 @@ const NewsletterCard: React.FC<{ nl: NewsletterSummary }> = ({ nl }) => {
 
         <div className="md:w-3/4 flex flex-col justify-center gap-4 relative">
           <div className="absolute top-0 right-0 flex gap-2">
-            <button 
+            <button
               onClick={toggleSave}
               title={isSaved ? "Remover dos salvos" : "Salvar edição"}
               className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${isSaved ? 'bg-accent border-accent text-white' : 'border-gray-200 text-gray-400 hover:text-accent hover:border-accent'}`}
             >
               <svg className="w-3 h-3" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
             </button>
-            <button 
+            <button
               onClick={openShare}
               title="Compartilhar"
               className="w-8 h-8 rounded-full border border-gray-200 text-gray-400 hover:text-accent hover:border-accent flex items-center justify-center transition-all"

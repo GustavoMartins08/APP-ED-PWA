@@ -13,14 +13,14 @@ const SubscribePremium: React.FC = () => {
     jobTitle: '',
     company: ''
   });
-  
+
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
-    
+
     try {
       const result = await saveNewsletterSubscription(formData);
       if (result.success) {
@@ -50,7 +50,7 @@ const SubscribePremium: React.FC = () => {
 
       <div className="w-full max-w-4xl relative z-10">
         <div className="flex justify-end items-center mb-16 md:mb-24">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-accent flex items-center gap-3 transition-colors"
           >
@@ -76,7 +76,7 @@ const SubscribePremium: React.FC = () => {
             <div className="lg:col-span-2 space-y-10 md:space-y-12">
               <div className="space-y-6">
                 <span className="text-accent text-[11px] md:text-[14px] font-black uppercase tracking-[0.6em] block">Inscrição Premium</span>
-                <h1 className="font-serif text-5xl md:text-7xl font-black text-primary uppercase leading-[0.9] tracking-tighter">
+                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-primary uppercase leading-[0.9] tracking-tighter">
                   Sua Dose <br /> Diária de <br /> <span className="text-accent">Clareza</span>.
                 </h1>
                 <p className="text-secondary text-lg md:text-xl font-light leading-relaxed opacity-60">
@@ -105,83 +105,82 @@ const SubscribePremium: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mb-8">
                   <div>
                     <label className={labelClasses}>Nome</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: Roberto" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: Roberto"
+                      className={inputClasses}
                       value={formData.firstName}
-                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     />
                   </div>
                   <div>
                     <label className={labelClasses}>Sobrenome</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: Costa" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: Costa"
+                      className={inputClasses}
                       value={formData.lastName}
-                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     />
                   </div>
                 </div>
 
                 <div className="mb-8">
                   <label className={labelClasses}>E-mail Corporativo</label>
-                  <input 
-                    required 
-                    type="email" 
-                    placeholder="roberto@empresa.com.br" 
-                    className={inputClasses} 
+                  <input
+                    required
+                    type="email"
+                    placeholder="roberto@empresa.com.br"
+                    className={inputClasses}
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
 
                 <div className="mb-8">
                   <label className={labelClasses}>WhatsApp para Briefings</label>
-                  <input 
-                    required 
-                    type="tel" 
-                    placeholder="(11) 99999-9999" 
-                    className={inputClasses} 
+                  <input
+                    required
+                    type="tel"
+                    placeholder="(11) 99999-9999"
+                    className={inputClasses}
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 mb-12">
                   <div>
                     <label className={labelClasses}>Cargo</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: CTO" 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: CTO"
+                      className={inputClasses}
                       value={formData.jobTitle}
-                      onChange={(e) => setFormData({...formData, jobTitle: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
                     />
                   </div>
                   <div>
                     <label className={labelClasses}>Empresa</label>
-                    <input 
-                      required 
-                      type="text" 
-                      placeholder="Ex: Startup S.A." 
-                      className={inputClasses} 
+                    <input
+                      required
+                      type="text"
+                      placeholder="Ex: Startup S.A."
+                      className={inputClasses}
                       value={formData.company}
-                      onChange={(e) => setFormData({...formData, company: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     />
                   </div>
                 </div>
 
-                <button 
+                <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className={`w-full bg-primary text-white font-black uppercase tracking-[0.4em] py-6 md:py-8 rounded-2xl text-[11px] md:text-[14px] transition-all flex items-center justify-center gap-4 ${
-                    status === 'loading' ? 'opacity-50 cursor-wait' : 'hover:bg-accent hover:scale-[1.01] active:scale-95 shadow-2xl shadow-primary/10'
-                  }`}
+                  className={`w-full bg-primary text-white font-black uppercase tracking-[0.4em] py-6 md:py-8 rounded-2xl text-[11px] md:text-[14px] transition-all flex items-center justify-center gap-4 ${status === 'loading' ? 'opacity-50 cursor-wait' : 'hover:bg-accent hover:scale-[1.01] active:scale-95 shadow-2xl shadow-primary/10'
+                    }`}
                 >
                   {status === 'loading' ? 'Processando...' : 'Obter Acesso Premium'}
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
