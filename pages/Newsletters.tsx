@@ -95,8 +95,8 @@ const Newsletters: React.FC = () => {
               key={f}
               onClick={() => setActiveFilter(f)}
               className={`whitespace-nowrap px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all ${activeFilter === f
-                  ? 'bg-accent text-white shadow-xl shadow-accent/20'
-                  : 'bg-lightGray text-secondary hover:bg-gray-200'
+                ? 'bg-accent text-white shadow-xl shadow-accent/20'
+                : 'bg-lightGray text-secondary hover:bg-gray-200'
                 }`}
             >
               {f}
@@ -171,6 +171,7 @@ const NewsletterCard: React.FC<{ nl: NewsletterSummary }> = ({ nl }) => {
     <div className="relative group">
       <Link
         to={`/newsletter/${nl.id}`}
+        state={{ showPdf: false }}
         className="flex flex-col md:flex-row gap-8 md:gap-16 p-8 md:p-14 rounded-[2.5rem] bg-lightGray/30 border border-gray-50 hover:bg-white hover:shadow-2xl hover:border-accent/10 transition-all duration-500"
       >
         <div className="md:w-1/4 shrink-0 flex flex-col justify-between">

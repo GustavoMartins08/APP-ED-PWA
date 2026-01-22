@@ -70,7 +70,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
         ref={cardRef}
         className={`relative group overflow-hidden transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
       >
-        <Link to={detailLink} className="flex flex-col sm:flex-row gap-6 md:gap-10 items-start relative z-0">
+        <Link to={detailLink} state={{ showPdf: false }} className="flex flex-col sm:flex-row gap-6 md:gap-10 items-start relative z-0">
           <div className="w-full sm:w-2/5 md:w-1/3 aspect-video sm:aspect-[4/3] md:aspect-square lg:aspect-[4/3] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shrink-0 shadow-sm bg-gray-100 relative gpu-accelerated">
             <img
               src={item.imageUrl}
@@ -122,7 +122,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
       className={`h-full flex flex-col rounded-[2.5rem] md:rounded-[3rem] overflow-hidden group shadow-sm border border-gray-100 hover:shadow-2xl hover:border-accent/10 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] bg-white gpu-accelerated ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
       style={{ transitionDelay: `${index % 4 * 100}ms` }}
     >
-      <Link to={detailLink} className="block h-full flex flex-col">
+      <Link to={detailLink} state={{ showPdf: false }} className="block h-full flex flex-col">
         <div className="aspect-[16/10] overflow-hidden bg-gray-100 relative">
           <img
             src={item.imageUrl}

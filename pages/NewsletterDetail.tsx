@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { fetchLatestNews } from '../lib/supabaseClient';
 import { NewsletterEdition, NewsItem } from '../types';
 import NewsletterForm from '../components/NewsletterForm';
@@ -9,17 +9,21 @@ import ShareModal from '../components/ShareModal';
 const NewsletterDetail: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const showPdf = location.state?.showPdf;
   const [edition, setEdition] = useState<NewsletterEdition | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
+    // ... existing useEffect ...
     const loadNewsletter = async () => {
       window.scrollTo(0, 0);
       const newsBase = await fetchLatestNews();
 
       const mockItems: NewsItem[] = [
+        // ... (mock items content kept same, implied) ...
         {
           ...newsBase[0],
           id: 'n1',
@@ -81,6 +85,8 @@ const NewsletterDetail: React.FC = () => {
     };
     loadNewsletter();
   }, [id]);
+
+  // ... (rest of methods)
 
   const toggleSave = () => {
     const nid = id || 'current';
@@ -163,7 +169,7 @@ const NewsletterDetail: React.FC = () => {
       </header>
 
       {/* PDF Viewer Section */}
-      {edition.pdfUrl && (
+      {edition.pdfUrl && showPdf && (
         <section className="bg-white relative z-20 -mt-12 md:-mt-20 mx-4 md:mx-12 lg:mx-24 mb-16 md:mb-32">
           <div className="container mx-auto">
             <div className="bg-white rounded-[2rem] p-4 md:p-8 shadow-2xl border-2 border-gray-100">

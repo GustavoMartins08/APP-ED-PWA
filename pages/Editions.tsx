@@ -62,7 +62,7 @@ const Editions: React.FC = () => {
         subtitle="Análises verticais profundas sobre os pilares que sustentam a economia digital global."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 md:gap-20 mt-16 md:mt-24">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12 md:gap-20 mt-16 md:mt-24">
         {editorials.length > 0 ? (
           editorials.map(ed => {
             const isSaved = savedEditions.includes(ed.id);
@@ -70,7 +70,7 @@ const Editions: React.FC = () => {
               <div
                 key={ed.id}
                 className="group cursor-pointer"
-                onClick={() => navigate(`/newsletter/${ed.id}`)}
+                onClick={() => navigate(`/edicao/${ed.id}`)}
               >
                 <div className="relative aspect-[3/4] mb-8 rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-accent/20 group-hover:-translate-y-4">
                   <img

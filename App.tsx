@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import LatestNews from './pages/LatestNews';
 import ArticleDetail from './pages/ArticleDetail';
 import NewsletterDetail from './pages/NewsletterDetail';
+import EditionDetail from './pages/EditionDetail';
 import Newsletters from './pages/Newsletters';
 import Editions from './pages/Editions';
 import VideosPage from './pages/VideosPage';
@@ -36,6 +37,7 @@ const App: React.FC = () => {
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/artigo/:id" element={<ArticleDetail />} />
           <Route path="/newsletter/:id" element={<NewsletterDetail />} />
+          <Route path="/edicao/:id" element={<EditionDetail />} />
           <Route path="/subscribe-premium" element={<SubscribePremium />} />
         </Routes>
       </Layout>

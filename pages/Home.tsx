@@ -302,7 +302,7 @@ const Home: React.FC = () => {
                   <div
                     key={ed.id}
                     className="w-[300px] md:w-[380px] shrink-0 snap-start snap-always group cursor-pointer"
-                    onClick={() => navigate(`/newsletter/${ed.id}`)}
+                    onClick={() => navigate(`/edicao/${ed.id}`)}
                   >
                     <div className="aspect-[3/4] rounded-[3rem] md:rounded-[5rem] overflow-hidden shadow-2xl mb-12 relative bg-white border border-gray-100">
                       <img
