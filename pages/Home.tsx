@@ -6,9 +6,11 @@ import NewsletterForm from '../components/NewsletterForm';
 import HeroCarousel from '../components/HeroCarousel';
 import ScrollLineDivider from '../components/ScrollLineDivider';
 import { fetchLatestNews, fetchEditorials, fetchVideos } from '../lib/supabaseClient';
+import { getOptimizedImageUrl } from '../lib/imageUtils';
 import { NewsItem, Editorial, Video } from '../types';
 import { useNavigate } from 'react-router-dom';
 import ShareModal from '../components/ShareModal';
+import Skeleton from '../components/ui/Skeleton';
 
 const Home: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -69,35 +71,41 @@ const Home: React.FC = () => {
   }, [loading]);
 
   useEffect(() => {
-    const loadData = async () => {
-      const [newsData, editorialData, videoData] = await Promise.all([
-        fetchLatestNews(),
-        fetchEditorials(),
-        fetchVideos()
-      ]);
-
-      const mainNews = [...newsData, ...newsData.map(n => ({ ...n, id: n.id + '_extra' }))].slice(0, 6);
+    // Independent fetching for better perceived performance
+    const loadNews = async () => {
+      const data = await fetchLatestNews();
+      const mainNews = [...data, ...data.map(n => ({ ...n, id: n.id + '_extra' }))].slice(0, 6);
       setNews(mainNews);
+    };
 
-      const mockNewsletters = newsData.map(n => ({
+    const loadEditorials = async () => {
+      const data = await fetchEditorials();
+      setEditorials(data);
+    };
+
+    const loadVideos = async () => {
+      const data = await fetchVideos();
+      setVideos(data);
+    };
+
+    const loadNewsletters = async () => {
+      const data = await fetchLatestNews(); // In real app, fetchNewsletters()
+      const mockNewsletters = data.map(n => ({
         ...n,
         id: 'nl_' + n.id,
         category: 'Newsletter Semanal',
         title: 'Edição: ' + n.title
       }));
       setNewsletters(mockNewsletters);
-
-      setEditorials(editorialData);
-      setVideos(videoData);
-
-      setSavedItems({
-        newsletters: JSON.parse(localStorage.getItem('saved_newsletters') || '[]'),
-        videos: JSON.parse(localStorage.getItem('saved_videos') || '[]')
-      });
-
-      setLoading(false);
     };
-    loadData();
+
+    Promise.all([loadNews(), loadEditorials(), loadVideos(), loadNewsletters()])
+      .then(() => setLoading(false));
+
+    setSavedItems({
+      newsletters: JSON.parse(localStorage.getItem('saved_newsletters') || '[]'),
+      videos: JSON.parse(localStorage.getItem('saved_videos') || '[]')
+    });
   }, []);
 
   useEffect(() => {
@@ -184,15 +192,8 @@ const Home: React.FC = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white" role="status">
-        <div className="text-center font-serif text-3xl animate-pulse text-accent tracking-tighter uppercase">
-          Carregando...
-        </div>
-      </div>
-    );
-  }
+  // No global loading return
+
 
   const revealClass = (id: string) => `transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] transform ${visibleSections.has(id) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`;
 
@@ -230,7 +231,18 @@ const Home: React.FC = () => {
             ref={newslettersRef}
             className="flex gap-10 md:gap-16 overflow-x-auto pb-10 snap-x snap-mandatory scroll-smooth scroll-px-0 scrollbar-hide"
           >
-            {newsletters.length > 0 ? (
+            {loading ? (
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className="w-[85vw] md:w-[500px] shrink-0 snap-start snap-always">
+                  <div className="aspect-[16/9] md:aspect-[21/9] rounded-[2rem] bg-gray-100 mb-6 relative overflow-hidden">
+                    <Skeleton className="w-full h-full" variant="card" />
+                  </div>
+                  <Skeleton className="h-4 w-24 mb-4" variant="text" />
+                  <Skeleton className="h-8 w-full mb-4" variant="text" />
+                  <Skeleton className="h-4 w-3/4" variant="text" />
+                </div>
+              ))
+            ) : newsletters.length > 0 ? (
               newsletters.map((nl, idx) => (
                 <div key={nl.id} className="w-[85vw] md:w-[500px] shrink-0 snap-start snap-always">
                   <NewsCard item={nl} index={idx} />
@@ -263,7 +275,17 @@ const Home: React.FC = () => {
             ref={newsRef}
             className="flex gap-10 md:gap-16 overflow-x-auto pb-16 snap-x snap-mandatory scroll-smooth scroll-px-0 scrollbar-hide"
           >
-            {news.length > 0 ? (
+            {loading ? (
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className="min-w-[80vw] md:min-w-[450px] snap-start snap-always">
+                  <div className="aspect-[1.5] rounded-[2rem] bg-gray-100 mb-6 overflow-hidden">
+                    <Skeleton className="w-full h-full" variant="card" />
+                  </div>
+                  <Skeleton className="h-4 w-32 mb-4" variant="text" />
+                  <Skeleton className="h-8 w-full mb-4" variant="text" />
+                </div>
+              ))
+            ) : news.length > 0 ? (
               news.map((item, idx) => (
                 <div key={item.id} className="min-w-[80vw] md:min-w-[450px] snap-start snap-always">
                   <NewsCard item={item} index={idx} />
@@ -306,9 +328,11 @@ const Home: React.FC = () => {
                   >
                     <div className="aspect-[3/4] rounded-[3rem] md:rounded-[5rem] overflow-hidden shadow-2xl mb-12 relative bg-white border border-gray-100">
                       <img
-                        src={ed.imageUrl}
+                        src={getOptimizedImageUrl(ed.imageUrl, 600)}
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
                         alt={ed.theme}
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                         <span className="bg-white text-primary px-10 py-5 rounded-full text-[12px] font-black uppercase tracking-widest shadow-2xl">Acessar Insight</span>
@@ -467,9 +491,11 @@ const Home: React.FC = () => {
             </div>
             <div className="lg:w-[40%] w-full min-h-[400px] lg:min-h-full relative grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200"
+                src={getOptimizedImageUrl("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200", 800)}
                 alt="Inteligência Estratégica"
                 className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/20 lg:bg-none"></div>
             </div>
