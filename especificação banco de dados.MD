@@ -157,7 +157,19 @@ Assinantes da newsletter (pode ser integrado com provedor externo, mas bom mante
 | `email` | `text` | Sim | Unique. |
 | `first_name` | `text` | Não | |
 | `last_name` | `text` | Não | |
+| `phone` | `text` | Não | WhatsApp. |
+| `job_title` | `text` | Não | Cargo. |
+| `company` | `text` | Não | Empresa. |
 | `active` | `boolean` | Sim | Default: true. |
+
+### 2.11. `public.editorial_items` (Relacionamento Editorial <-> Notícias)
+Define quais notícias compõem uma edição/dossiê.
+
+| Coluna | Tipo | Obrigatório | Descrição |
+| :--- | :--- | :--- | :--- |
+| `editorial_id` | `uuid` | Sim | FK para `editorials.id`. |
+| `news_item_id` | `uuid` | Sim | FK para `news_items.id`. |
+| `order` | `int` | Sim | Ordem de exibição no editorial. |
 
 ## 3. Políticas de Segurança (RLS) - Implementação Técnica
 

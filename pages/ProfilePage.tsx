@@ -1,38 +1,56 @@
-
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import SectionHeader from '../components/SectionHeader';
 import NewsCard from '../components/NewsCard';
-import { fetchNewsByIds } from '../lib/supabaseClient';
-import { NewsItem, User } from '../types';
+import { fetchNewsByIds, supabase } from '../lib/supabaseClient';
+import { NewsItem } from '../types';
+import { LayoutDashboard } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [savedArticles, setSavedArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const authUser = localStorage.getItem('auth_user');
-    if (!authUser) {
-      navigate('/login');
-      return;
-    }
-    setUser(JSON.parse(authUser));
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
 
-    const loadSaved = async () => {
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+
+      setUser(session.user);
+
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        setIsAdmin(true);
+      }
+
+      // Load saved articles from local storage (hybrid approach until migrated)
       const savedIds = JSON.parse(localStorage.getItem('saved_articles') || '[]');
       if (savedIds.length > 0) {
         const data = await fetchNewsByIds(savedIds);
         setSavedArticles(data);
       }
+
       setLoading(false);
     };
-    loadSaved();
+
+    checkAuth();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth_user');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('auth_user'); // Clear legacy mock if exists
     navigate('/');
   };
 
@@ -51,13 +69,19 @@ const ProfilePage: React.FC = () => {
         <div className="container mx-auto px-6 md:px-16 lg:px-24">
           <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-12">
             <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
-              <div className="w-24 h-24 md:w-40 md:h-40 bg-accent rounded-full flex items-center justify-center text-white font-serif font-black text-4xl md:text-7xl shadow-2xl">
-                {user?.name?.charAt(0) || 'U'}
+              <div className="w-24 h-24 md:w-40 md:h-40 bg-accent rounded-full flex items-center justify-center text-white font-serif font-black text-4xl md:text-7xl shadow-2xl relative overflow-hidden">
+                {user?.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="Avatar" />
+                ) : (
+                  user?.email?.charAt(0).toUpperCase() || 'U'
+                )}
               </div>
               <div className="space-y-3">
-                <span className="text-accent text-[11px] font-black uppercase tracking-[0.6em] block">Membro Premium</span>
+                <span className="text-accent text-[11px] font-black uppercase tracking-[0.6em] block">
+                  {isAdmin ? 'Administrador' : 'Membro Premium'}
+                </span>
                 <h1 className="font-serif text-4xl md:text-7xl font-black text-primary uppercase tracking-tighter leading-none">
-                  {user?.name}
+                  {user?.user_metadata?.name || user?.email?.split('@')[0]}
                 </h1>
                 <p className="text-secondary text-base md:text-xl font-light italic opacity-60">
                   {user?.email}
@@ -65,12 +89,22 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={handleLogout}
-              className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-accent border-b-2 border-gray-100 hover:border-accent transition-all pb-2 mb-2"
-            >
-              Encerrar Sessão
-            </button>
+            <div className="flex flex-col items-end gap-4">
+              {isAdmin && (
+                <Link to="/admin/dashboard">
+                  <button className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] hover:bg-accent transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <LayoutDashboard className="w-4 h-4" />
+                    Acessar Painel Admin
+                  </button>
+                </Link>
+              )}
+              <button
+                onClick={handleLogout}
+                className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-accent border-b-2 border-gray-100 hover:border-accent transition-all pb-2"
+              >
+                Encerrar Sessão
+              </button>
+            </div>
           </div>
         </div>
       </section>

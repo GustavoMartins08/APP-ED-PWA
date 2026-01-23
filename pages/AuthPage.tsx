@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,26 +12,45 @@ const AuthPage: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Simulação de autenticação
-    setTimeout(() => {
-      if (email && password) {
-        const user = {
-          id: 'u' + Date.now(),
-          name: isLogin ? 'Ricardo Montenegro' : name,
-          email: email
-        };
-        localStorage.setItem('auth_user', JSON.stringify(user));
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
         navigate('/perfil');
       } else {
-        setError('Credenciais inválidas. Verifique seus dados.');
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: name.split(' ')[0],
+              last_name: name.split(' ').slice(1).join(' '),
+              name: name,
+            }
+          }
+        });
+        if (error) throw error;
+        if (data.session) {
+          navigate('/perfil');
+        } else {
+          setError('Verifique seu email para confirmar o cadastro.');
+          setLoading(false);
+          return;
+        }
       }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message === 'Invalid login credentials' ? 'Credenciais inválidas.' : err.message);
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -47,7 +67,7 @@ const AuthPage: React.FC = () => {
           {!isLogin && (
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nome Completo</label>
-              <input 
+              <input
                 required
                 type="text"
                 placeholder="Ex: Ricardo Montenegro"
@@ -57,10 +77,10 @@ const AuthPage: React.FC = () => {
               />
             </div>
           )}
-          
+
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">E-mail Corporativo</label>
-            <input 
+            <input
               required
               type="email"
               placeholder="seu@email.com.br"
@@ -72,7 +92,7 @@ const AuthPage: React.FC = () => {
 
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Senha</label>
-            <input 
+            <input
               required
               type="password"
               placeholder="••••••••"
@@ -88,7 +108,7 @@ const AuthPage: React.FC = () => {
             </p>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-primary text-white font-black uppercase tracking-[0.4em] py-6 rounded-2xl text-[12px] hover:bg-accent hover:scale-[1.01] active:scale-95 transition-all shadow-xl shadow-primary/10"
@@ -101,7 +121,7 @@ const AuthPage: React.FC = () => {
           <p className="text-secondary text-sm font-medium italic opacity-60 mb-4">
             {isLogin ? 'Ainda não possui credenciais?' : 'Já possui acesso premium?'}
           </p>
-          <button 
+          <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-[11px] font-black uppercase tracking-[0.4em] text-accent hover:text-primary transition-colors border-b-2 border-accent/20 hover:border-primary pb-1"
           >

@@ -1,181 +1,197 @@
 # Especificação do Painel Administrativo - Empresário Digital
 
-**Status:** RASCUNHO  
-**Data:** 20 de Janeiro de 2026  
-**Objetivo:** Definir a estrutura, funcionalidades e requisitos para o desenvolvimento do Painel Administrativo que gerenciará todo o conteúdo da plataforma **Empresário Digital**.
+**Status:** PRONTO PARA DESENVOLVIMENTO
+**Data:** 22 de Janeiro de 2026
+**Banco de Dados:** Conectado ao projeto Supabase existente (`mzknvirbhibmcixmuqbq`).
 
 ---
 
-## 1. Visão Geral
+## 1. Visão Geral e Arquitetura
 
-O Painel Administrativo será uma aplicação frontend **separada** da plataforma principal (PWA), desenvolvida em React. Ela se conectará ao **mesmo projeto Supabase** já existente, permitindo que administradores gerenciem o conteúdo (Notícias, Vídeos, Editoriais, Colunistas) e visualizem dados de usuários e leads.
+O Painel Administrativo ("Backoffice") será integrado diretamente na aplicação React existente como um **módulo de rota protegida** (`/admin`).
 
-### 1.1. Arquitetura
-- **Frontend App:** Aplicação React independente (ex: `admin.empresariodigital.com.br` ou subrota `/admin` protegida).
-- **Backend:** Supabase (PostgreSQL + Auth + Storage).
-- **Segurança:** Acesso restrito via Row Level Security (RLS) a usuários com `role = 'admin'`.
+### 1.1. Estrutura de Rotas
+*   **Aplicação Principal (Pública/Assinantes):** Rotas `/`, `/noticias`, `/videos`, etc. Acessível a todos (com bloqueios de conteúdo Premium).
+*   **Painel Administrativo (Privado):** Rota `/admin/*`.
+    *   **Proteção:** Um componente `AdminRoute` verifica se o usuário logado possui `role === 'admin'`. Se não, redireciona para `/`.
+    *   **Layout:** O `/admin` terá um layout exclusivo (Sidebar lateral em vez de Header de navegação), focado em densidade de dados.
 
----
+### 1.2. Estratégia Mobile & PWA
+Como o Admin é parte da mesma aplicação PWA:
+*   **Instalação:** Ao instalar o PWA "Empresário Digital", o administrador instala **ambos** (App Público + Admin).
+*   **Acesso Mobile:**
+    *   O admin abre o PWA instalado.
+    *   Se estiver logado como admin, o Menu Principal ganha um botão extra **"Acessar Admin"**.
+    *   Ao clicar, a UI transiciona para o layout do Backoffice dentro do mesmo app.
+    *   Isso permite gerenciar o portal *on-the-go* sem precisar de um segundo app instalado.
 
-## 2. Autenticação e Controle de Acesso
-
-### 2.1. Login
-- **Método:** Autenticação via Email/Senha (usando Supabase Auth).
-- **Validação de Permissão:** Após o login, a aplicação deve verificar na tabela `public.profiles` se o usuário logado possui `role === 'admin'`.
-- **Bloqueio:** Se o usuário não for admin, redirecionar para uma página de "Acesso Negado" ou para a Home pública.
-
-### 2.2. Gestão de Administradores
-- **Funcionalidade:** Visualizar lista de usuários e promover/rebaixar permissões (Subscriber <-> Admin).
-- **Tabela Relacionada:** `public.profiles`.
-
----
-
-## 3. Dashboard (Visão Geral)
-
-Ao logar, o administrador deve ver um resumo da plataforma:
-*   **Métricas Rápidas:**
-    *   Total de Usuários Cadastrados.
-    *   Total de Assinantes Premium.
-    *   Notícias Publicadas (Mês Atual).
-    *   Leads de Publicidade Pendentes.
-*   **Atalhos Rápidos:** Botões para "Nova Notícia", "Novo Vídeo", "Novo Editorial".
+### 1.3. Stack Tecnológica
+*   **Frontend:** React (Vite) + Tailwind CSS (Projeto Atual).
+*   **UI Kit:** ShadcnUI (recomendado para consistência e velocidade).
+*   **Ícones:** Lucide React.
+*   **Dados:** Supabase Client (`@supabase/supabase-js`) conectando ao projeto existente.
+*   **Gerenciamento de Estado:** TanStack Query (React Query) para cache e otimização.
 
 ---
 
-## 4. Gerenciamento de Conteúdo (CRUD)
+## 2. Autenticação e Segurança
 
-O painel deve oferecer interfaces completas (Listagem, Criação, Edição, Exclusão) para cada tipo de conteúdo.
+### 2.1. Tela de Login
+*   **Visual:** Minimalista, logo "Empresário Digital".
+*   **Campos:** Email e Senha.
+*   **Ação:**
+    1.  Autenticar via `supabase.auth.signInWithPassword`.
+    2.  Verificar na tabela `public.profiles` se o `user.id` retornado possui o campo `role` igual a `'admin'`.
+    3.  **Crucial:** Se `role !== 'admin'`, realizar logout imediato e exibir erro "Acesso não autorizado".
+
+---
+
+## 3. Dashboard Principal
+
+Visão macro do negócio ao entrar no sistema.
+
+*   **KPIs (Cards no topo):**
+    *   **Usuários Totais:** `count` da tabela `profiles`.
+    *   **Assinantes Premium:** `count` onde `subscription_status = 'premium'`.
+    *   **Leads de Publicidade:** `count` da tabela `advertiser_inquiries` (novos/total).
+    *   **Newsletter:** Próximo envio agendado.
+*   **Ações Rápidas (Botões):**
+    *   "Nova Notícia"
+    *   "Novo Vídeo"
+    *   "Criar Edição Mensal"
+
+---
+
+## 4. Gestão de Conteúdo (CMS)
 
 ### 4.1. Notícias e Artigos (`news_items`)
-Responsável pelo feed principal e artigos de colunistas.
+O coração do conteúdo diário.
 
-**Funcionalidades:**
-*   **Listagem:** Tabela com Título, Categoria, Autor (se houver), Data de Publicação, Status (Premium/Free).
-    *   Filtros: Por Categoria, Por Autor, Por Status.
-    *   Busca: Por título.
-*   **Formulário de Criação/Edição:**
-    *   `title` (Texto): Título da manchete.
-    *   `slug` (Texto - *Gerar automaticamente do título mas permitir edição*).
-    *   `excerpt` (Texto Longo): Resumo para o card.
-    *   `content` (Rich Text Editor / Markdown): Conteúdo completo do artigo.
-    *   `category` (Select): Tecnologia, Negócios, Startups, Carreira, etc.
-    *   `source` (Select/Texto): Fonte original (LinkedIn, YouTube, Autoral).
-    *   `author_id` (Select - *Opcional*): Selecionar um Colunista da tabela `columnists`.
-    *   `image_url` (Upload de Imagem): Upload para Supabase Storage -> Bucket `news-images`.
-    *   `is_premium` (Checkbox): Conteúdo exclusivo para assinantes?
-    *   `key_points` (Lista Dinâmica): Adicionar/Remover frases de destaque (bullet points).
-    *   `published_at` (Datetime): Agendamento ou data retroativa.
+**Interface de Listagem:**
+*   **Tabela:** Imagem (Thumb), Título, Autor, Categoria, Status (Premium/Free), Data.
+*   **Filtros:** Por Categoria, Por Status (Premium/Free), Busca por Título.
 
-### 4.2. Vídeos (`videos`)
-Gerenciamento do acervo de vídeos e briefings.
+**Interface de Edição/Criação:**
+1.  **Manchete e SEO:**
+    *   `Título` (Input Texto).
+    *   `Slug` (Input Texto - *Gerar automático a partir do título, editável*).
+    *   `Resumo/Excerpt` (Textarea - Limite ~200 chars).
+2.  **Conteúdo:**
+    *   `Corpo do Texto` (Rich Text Editor - Tiptap ou Quill).
+    *   `Pontos Chave (Key Points)`: Lista dinâmica. Botão "+ Adicionar Ponto" cria novos inputs de texto para os bullets do card.
+3.  **Mídia e Classificação:**
+    *   `Imagem de Capa`: Upload (Bucket `news-images`). Preview da imagem.
+    *   `Categoria`: Select (Tecnologia, Negócios, Startups, etc.).
+    *   `Fonte`: Select/Input (LinkedIn, Autoral, etc.).
+    *   `Autor`: Select (Busca na tabela `columnists`). Se vazio, assume "Redação".
+4.  **Configurações:**
+    *   `Conteúdo Premium?` (Switch/Toggle).
+    *   `Visibilidade`: "Público" (Feed) ou "Oculto" (Exclusivo Newsletter).
+    *   `Data de Publicação`: Datepicker.
 
-**Funcionalidades:**
-*   **Listagem:** Thumbnail, Título, Plataforma, Duração.
-*   **Formulário de Criação/Edição:**
-    *   `title` (Texto).
-    *   `description` (Texto Longo).
-    *   `platform` (Select): YouTube, Vimeo.
-    *   `external_id` (Texto): ID do vídeo na plataforma.
-    *   `url` (Calculado ou Input): Link direto.
-    *   `duration` (Texto): Ex: "12:30".
-    *   `category` (Select): Entrevistas, Análises, Clipes.
-    *   `image_url` (Upload de Imagem): Thumbnail customizada. Supabase Bucket `video-thumbs`.
+### 4.2. Editoriais e Dossiês (`editorials` + `editorial_items`)
+Gerenciamento das edições mensais (ex: "Janeiro 2026 - O Futuro da IA").
 
-### 4.3. Editoriais e Dossiês (`editorials`)
-Gerenciamento das edições mensais (Capas Verticais).
+**Fluxo de 2 Etapas:**
 
-**Funcionalidades:**
-*   **Listagem:** Mês/Ano, Tema, Capa.
-*   **Formulário de Criação/Edição:**
-    *   `month_year` (Texto): Ex: "Fevereiro 2026".
-    *   `theme` (Texto): Título do tema.
-    *   `summary` (Texto Longo): Resumo da edição.
-    *   `content` (Rich Text Editor): Texto introdutório.
-    *   `image_url` (Upload de Imagem): Imagem vertical de alta qualidade. Bucket `editorial-covers`.
-    *   `pdf_url` (Upload de Arquivo - *Opcional*): Arquivo PDF da edição. Bucket `editorial-files`.
+**Etapa 1: A Edição (Capa)**
+*   Dados da tabela `editorials`.
+*   Campos: `Mês/Ano`, `Tema (Título)`, `Resumo`, `Imagem de Capa Vertical`, `Introdução (Texto)`, `PDF (Upload)`.
 
-### 4.5. Newsletters (`newsletters` e `newsletter_items`)
-**Montagem de edições semanais e conteúdo exclusivo.**
+**Etapa 2: O Dossiê (Conteúdo)**
+*   Dentro da tela de detalhes da Edição, haverá uma seção **"Artigos desta Edição"**.
+*   **Funcionamento:** Gerencia a tabela `editorial_items`.
+*   **Interface:**
+    *   **Lista Atual:** Mostra os artigos vinculados, com *drag-and-drop* para reordenar (campo `order`).
+    *   **Adicionar Artigo:** Um botão abre um modal com buscador de artigos (`news_items`). O admin seleciona quais notícias compõem este dossiê.
 
-**Fluxo de Trabalho:**
-1.  **Criar Edição:** Define os dados básicos da newsletter.
-2.  **Gerenciar Pauta:** Adiciona itens à newsletter (Curadoria ou Criação).
+### 4.3. Newsletters (`newsletters` + `newsletter_items`)
+Montagem das newsletters semanais.
 
-**Funcionalidades:**
-*   **Listagem de Edições:** Título, Data, Síntese.
-*   **Formulário de Edição (Capa):**
-    *   `title` (Texto): Ex: "Edição #45".
-    *   `published_at` (Data).
-    *   `synthesis` (Texto Longo): O "Sintese de Valor" que aparece no card.
-    *   `cover_image` (Upload): Imagem de capa.
+**Fluxo Semelhante aos Editoriais:**
+1.  **Dados Gerais:** Título ("Edição #42"), Data, Síntese, Imagem de Capa.
+2.  **Pauta (Curadoria):**
+    *   Seção para vincular notícias à newsletter (tabela `newsletter_items`).
+    *   Permite selecionar notícias *já existentes* no acervo ou *criar novas notícias ocultas* especificamente para esta newsletter.
 
-*   **Gerenciador de Itens (Pauta):**
-    *   Interface de *Drag & Drop* ou Lista Ordenável para definir a sequência das notícias.
-    *   **Botão "Adicionar da Curadoria":** Abre um modal para buscar e selecionar notícias já publicadas no portal (`news_items` onde `visibility = 'public'`).
-    *   **Botão "Criar Exclusivo":** Abre um formulário simplificado de Notícia para criar um conteúdo que **não** vai para o feed público.
-        *   Ao salvar, o sistema cria um registro em `news_items` com `visibility = 'hidden'` e imediatamente o vincula a esta newsletter na tabela `newsletter_items`.
+### 4.4. Vídeos (`videos`)
+Acervo de briefings visuais.
 
-### 4.6. Colunistas (`columnists`)
-Cadastro dos autores que podem assinar artigos.
+**Interface de Edição:**
+*   `Título` e `Descrição`.
+*   `Plataforma`: YouTube/Vimeo.
+*   `ID Externo`: Ex: 'dQw4w9WgXcQ'.
+*   `Duração`: Input texto (ex: "10:35").
+*   `Categoria`: Select.
+*   `Thumbnail`: Upload customizado (Bucket `video-thumbs`).
 
-**Funcionalidades:**
-*   **Listagem:** Foto, Nome, Cargo, Empresa.
-*   **Formulário de Criação/Edição:**
-    *   `name` (Texto).
-    *   `role` (Texto).
-    *   `company` (Texto).
-    *   `bio` (Texto Longo).
-    *   `avatar_url` (Upload de Imagem): Foto de perfil. Bucket `avatars`.
+### 4.5. Colunistas (`columnists`)
+Cadastro de autores.
+
+**Interface:**
+*   `Nome`, `Cargo`, `Empresa`.
+*   `Bio`: Texto curto.
+*   `Avatar`: Upload de foto redonda (Bucket `avatars`).
 
 ---
 
-## 5. Gerenciamento de Usuários e Leads
+## 5. CRM e Leads
 
-### 5.1. Usuários (`profiles`)
-**Apenas Visualização e Edição de Permissões.**
-*   **Listagem:** Email, Nome, Status Assinatura, Role, Data Cadastro.
-*   **Ações:**
-    *   Editar `role` (Promover a Admin).
-    *   Visualizar dados básicos.
+### 5.1. Assinantes da Newsletter (`newsletter_subscriptions`)
+Base de contatos capturados pelos formulários "Assinar Agora" e "Acesso Premium".
 
-### 5.2. Leads de Publicidade (`advertiser_inquiries`)
-**Leitura de contatos comerciais.**
-*   **Listagem:** Data, Nome, Empresa, Email, Área de Interesse.
-*   **Detalhes:** Visualizar a mensagem completa enviada pelo anunciante.
-*   **Exportar:** Botão para exportar lista (CSV/Excel).
+**Interface de Listagem:**
+*   **Tabela Rica:**
+    *   Nome Completo (União de `first_name` + `last_name`).
+    *   Email.
+    *   **Empresa** (Novo campo).
+    *   **Cargo** (Novo campo).
+    *   **WhatsApp** (Novo campo `phone`).
+    *   Status (Ativo/Inativo).
+*   **Exportação:** Botão "Exportar CSV" no topo da tabela para uso em ferramentas de Email Marketing.
 
-### 5.3. Assinantes Newsletter (`newsletter_subscriptions`)
-*   **Listagem:** Email, Status (Ativo/Inativo).
-*   **Ações:** Ativar/Desativar assinatura manualmente.
+### 5.2. Anunciantes (`advertiser_inquiries`)
+Leads B2B interessados em publicidade.
 
----
+**Interface:**
+*   Listagem com data de contato, nome, empresa e **Área de Interesse**.
+*   Clique na linha abre modal/gaveta com a **Mensagem Completa** do lead.
 
-## 6. Requisitos Técnicos
+### 5.3. Usuários da Plataforma (`profiles`)
+Gestão de acesso.
 
-### 6.1. Stack Tecnológico Sugerido
-*   **Framework:** React (Vite) - Pode ser o mesmo monorepo ou projeto separado.
-*   **UI Library:** Tailwind CSS + ShadcnUI (para tabelas, modais e formulários rápidos).
-*   **Ícones:** Lucide React.
-*   **Gerenciamento de Estado:** React Query (TanStack Query) - Essencial para cache e estados de loading/erro nas listagens.
-*   **Formulários:** React Hook Form + Zod (validação).
-
-### 6.2. Integração Supabase
-*   Utilizar a biblioteca `@supabase/supabase-js`.
-*   **Storage:** 
-    *   Criar buckets públicos: `news-images`, `video-thumbs`, `editorial-covers`, `avatars`.
-    *   Implementar função de upload que retorna a URL pública para salvar no banco.
-
-### 6.3. RLS (Row Level Security)
-Para que o painel funcione, o usuário logado deve ter permissão de escrita. As políticas de segurança já definidas no banco (`especificação banco de dados.MD`) preveem que apenas `role='admin'` pode fazer INSERT/UPDATE/DELETE em tabelas públicas globais.
-*   **Check:** O frontend deve tratar erros de permissão (401/403) caso o token do usuário expire ou ele perca a permissão.
+**Interface:**
+*   Listagem de todos os usuários logados.
+*   **Coluna "Permissão":** Dropdown para alterar de 'subscriber' para 'admin' (e vice-versa).
+*   **Coluna "Assinatura":** Visualizar se é Free ou Premium.
 
 ---
 
-## 7. Próximos Passos para Implementação
+## 6. Bancos de Imagens (Storage)
 
-1.  **Setup do Projeto:** Inicia o projeto React Admin.
-2.  **Configuração Supabase:** Copiar `.env` e configurar cliente.
-3.  **Login Admin:** Criar página de login e Contexto de Autenticação.
-4.  **Layout Base:** Sidebar com navegação (Dashboard, Notícias, Vídeos, etc.).
-5.  **CRUDs:** Implementar módulo por módulo (começando por Notícias).
-6.  **Uploads:** Configurar buckets e componente de Drag & Drop.
+O painel deve abstrair a complexidade do Storage.
+*   Ao fazer upload de uma imagem (Capa de Notícia, Avatar, etc.), o sistema deve:
+    1.  Fazer upload para o bucket correto no Supabase.
+    2.  Obter a URL pública (`getPublicUrl`).
+    3.  Salvar essa URL no campo de texto correspondente no banco de dados.
+
+---
+
+## 7. Requisitos Visuais (UI/UX)
+
+*   **Tema:** Usar o mesmo DNA "Premium/Dark" ou "Clean/Corporate" do site principal, mas focado em produtividade (fundo branco/cinza claro para facilitar leitura de dados).
+*   **Feedback:** Toasts de sucesso ("Notícia salva com sucesso") e erro para todas as ações.
+*   **Loading:** Skeletons em tabelas enquanto os dados carregam.
+
+---
+
+## 8. Glossário de Tabelas (Referência Rápida)
+
+*   `news_items`: Artigos em geral.
+*   `editorials`: Capas das edições mensais.
+*   `editorial_items`: Ligação N:N entre Editoriais e Artigos (Onde "mora" a curadoria do mês).
+*   `newsletters`: Capas das newsletters.
+*   `newsletter_items`: Ligação N:N entre Newsletters e Artigos (A pauta da semana).
+*   `profiles`: Usuários e Admins.
+*   `newsletter_subscriptions`: Leads B2C.
+*   `advertiser_inquiries`: Leads B2B.
