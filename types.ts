@@ -36,6 +36,7 @@ export interface Editorial {
   theme: string;
   imageUrl: string;
   summary?: string;
+  pdfUrl?: string; // URL para o arquivo PDF do dossiê
 }
 
 export interface Video {

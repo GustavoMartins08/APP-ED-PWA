@@ -186,7 +186,7 @@ const EditorialForm: React.FC = () => {
                                     type="file"
                                     accept="application/pdf"
                                     className="absolute inset-0 opacity-0 cursor-pointer"
-                                    onChange={(e) => handleFileUpload(e, 'editorial-pdfs', 'pdf_url')} // Assuming bucket exists or need to use existing
+                                    onChange={(e) => handleFileUpload(e, 'edition-pdfs', 'pdf_url')}
                                 />
                                 {watch('pdf_url') ? (
                                     <div className="flex items-center justify-center gap-2 text-green-600">

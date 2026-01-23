@@ -4,6 +4,7 @@ import { fetchLatestNews } from '../lib/supabaseClient';
 import { NewsletterEdition, NewsItem } from '../types';
 import NewsletterForm from '../components/NewsletterForm';
 import ShareModal from '../components/ShareModal';
+import PDFReader from '../components/PDFReader';
 
 const EditionDetail: React.FC = () => {
     const { id } = useParams();
@@ -175,12 +176,8 @@ const EditionDetail: React.FC = () => {
                                     Download PDF
                                 </a>
                             </div>
-                            <div className="w-full aspect-[4/5] md:aspect-[16/9] bg-lightGray rounded-[1.5rem] overflow-hidden relative group">
-                                <iframe
-                                    src={`${edition.pdfUrl}#toolbar=0`}
-                                    className="w-full h-full"
-                                    title="PDF Viewer"
-                                ></iframe>
+                            <div className="w-full flex justify-center">
+                                <PDFReader url={edition.pdfUrl} />
                             </div>
                         </div>
                     </div>
