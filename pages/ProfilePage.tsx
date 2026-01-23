@@ -5,6 +5,7 @@ import NewsCard from '../components/NewsCard';
 import { fetchNewsByIds, supabase } from '../lib/supabaseClient';
 import { NewsItem } from '../types';
 import { LayoutDashboard } from 'lucide-react';
+import PushNotificationManager from '../components/PushNotificationManager';
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<any | null>(null);
@@ -111,6 +112,7 @@ const ProfilePage: React.FC = () => {
 
       {/* Saved Content */}
       <section className="py-20 md:py-32 container mx-auto px-6 md:px-16 lg:px-24">
+        <PushNotificationManager />
         <SectionHeader
           title="Meu Acervo"
           subtitle="Seus artigos salvos para consulta tática e revisão estratégica."

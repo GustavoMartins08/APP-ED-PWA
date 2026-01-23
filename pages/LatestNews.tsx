@@ -5,6 +5,8 @@ import NewsCard from '../components/NewsCard';
 import SectionHeader from '../components/SectionHeader';
 import { fetchLatestNews } from '../lib/supabaseClient';
 import { NewsItem } from '../types';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 const ITEMS_PER_PAGE = 4;
 const TOTAL_PAGES_SIMULATED = 5;
@@ -85,7 +87,13 @@ const LatestNews: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 min-h-[600px] will-change-composite">
         {loading ? (
           [1, 2, 3, 4].map(i => (
-            <div key={i} className="animate-pulse bg-lightGray aspect-[16/10] rounded-[3rem]" />
+            <div key={i}>
+              <div className="aspect-[1.5] rounded-[2rem] bg-gray-100 mb-6 overflow-hidden">
+                <Skeleton className="w-full h-full" variant="card" />
+              </div>
+              <Skeleton className="h-4 w-32 mb-4" variant="text" />
+              <Skeleton className="h-8 w-full mb-4" variant="text" />
+            </div>
           ))
         ) : news.length > 0 ? (
           news.map((item, index) => (
@@ -94,8 +102,8 @@ const LatestNews: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
-            <p className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-300">Terminal Sincronizado: Nenhuma notícia encontrada.</p>
+          <div className="col-span-full">
+            <EmptyState title="Nenhuma notícia encontrada" description="Não encontramos notícias para esta categoria no momento." />
           </div>
         )}
       </div>

@@ -5,6 +5,9 @@ import SectionHeader from '../components/SectionHeader';
 import { fetchEditorials } from '../lib/supabaseClient';
 import { Editorial } from '../types';
 import ShareModal from '../components/ShareModal';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
+import { getOptimizedImageUrl } from '../lib/imageUtils';
 
 const Editions: React.FC = () => {
   const [editorials, setEditorials] = useState<Editorial[]>([]);
@@ -47,13 +50,7 @@ const Editions: React.FC = () => {
     });
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="text-center font-serif text-xl animate-pulse text-accent uppercase tracking-[0.5em]">
-        Acessando Arquivos...
-      </div>
-    </div>
-  );
+  // Removed blocking loading check for better UX with Skeletons
 
   return (
     <div className="container mx-auto px-8 md:px-16 lg:px-32 xl:px-48 py-24 md:py-48">
@@ -63,7 +60,23 @@ const Editions: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12 md:gap-20 mt-16 md:mt-24">
-        {editorials.length > 0 ? (
+        {loading ? (
+          Array(3).fill(0).map((_, i) => (
+            <div key={i}>
+              <div className="relative aspect-[3/4] mb-8 rounded-[3rem] md:rounded-[4rem] overflow-hidden bg-gray-100">
+                <Skeleton className="w-full h-full" variant="card" />
+              </div>
+              <div className="px-4 space-y-4">
+                <Skeleton className="h-4 w-24 mb-3" variant="text" />
+                <Skeleton className="h-10 w-full mb-6" variant="text" />
+                <div className="flex gap-3">
+                  <Skeleton className="h-8 w-20 rounded-full" variant="rect" />
+                  <Skeleton className="h-8 w-24 rounded-full" variant="rect" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : editorials.length > 0 ? (
           editorials.map(ed => {
             const isSaved = savedEditions.includes(ed.id);
             return (
@@ -74,7 +87,7 @@ const Editions: React.FC = () => {
               >
                 <div className="relative aspect-[3/4] mb-8 rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-accent/20 group-hover:-translate-y-4">
                   <img
-                    src={ed.imageUrl}
+                    src={getOptimizedImageUrl(ed.imageUrl, 600)}
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
                     alt={ed.theme}
                     loading="lazy"
@@ -118,8 +131,8 @@ const Editions: React.FC = () => {
             );
           })
         ) : (
-          <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
-            <p className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-300">Nenhuma edição encontrada no acervo.</p>
+          <div className="col-span-full">
+            <EmptyState title="Nenhuma edição encontrada" description="Não há editoriais publicados no momento." />
           </div>
         )}
       </div>

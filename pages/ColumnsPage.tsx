@@ -5,6 +5,9 @@ import { fetchColumns, fetchLatestNews } from '../lib/supabaseClient';
 import { Columnist, NewsItem } from '../types';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ShareModal from '../components/ShareModal';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
+import { getOptimizedImageUrl } from '../lib/imageUtils';
 
 const ColumnsPage: React.FC = () => {
   const [columnists, setColumnists] = useState<Columnist[]>([]);
@@ -100,13 +103,7 @@ const ColumnsPage: React.FC = () => {
     setSearchParams(newParams);
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white" role="status">
-      <div className="text-center font-serif text-xl md:text-2xl animate-pulse text-accent tracking-tighter uppercase">
-        Sincronizando Vozes...
-      </div>
-    </div>
-  );
+  // Removed blocking loading check for better UX with Skeletons
 
   return (
     <div className="bg-white min-h-screen selection:bg-accent selection:text-white">
@@ -196,7 +193,25 @@ const ColumnsPage: React.FC = () => {
         </nav>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 transition-all duration-500">
-          {filteredColumns.length > 0 ? (
+          {loading ? (
+            Array(4).fill(0).map((_, i) => (
+              <div key={i} className="bg-white rounded-[2rem] md:rounded-[3rem] border border-gray-50 p-8 md:p-12 h-full">
+                <div className="flex items-center gap-4 mb-10 pb-8 border-b border-gray-100">
+                  <Skeleton className="w-14 h-14 rounded-full" variant="circle" />
+                  <div>
+                    <Skeleton className="h-3 w-24 mb-2" variant="text" />
+                    <Skeleton className="h-2 w-32" variant="text" />
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <Skeleton className="h-3 w-20" variant="text" />
+                  <Skeleton className="h-10 w-full" variant="text" />
+                  <Skeleton className="h-4 w-full" variant="text" />
+                  <Skeleton className="h-4 w-3/4" variant="text" />
+                </div>
+              </div>
+            ))
+          ) : filteredColumns.length > 0 ? (
             filteredColumns.map((column) => {
               const author = (column as any).author as Columnist;
               const isSaved = savedArticles.includes(column.id);
@@ -260,8 +275,8 @@ const ColumnsPage: React.FC = () => {
               );
             })
           ) : (
-            <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
-              <p className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-300">Terminal Sincronizado: Nenhum artigo para este filtro.</p>
+            <div className="col-span-full">
+              <EmptyState title="Nenhum artigo encontrado" description={`Nenhum artigo encontrado para o colunista "${activeColumnist}".`} />
             </div>
           )}
         </div>

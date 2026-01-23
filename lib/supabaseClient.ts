@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NewsletterSubscription, AdvertiserInquiry, NewsItem, Editorial, Video, Columnist } from '../types';
+import { offlineStorage } from './offlineStorage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -73,7 +74,13 @@ export const saveAdvertiserInquiry = async (data: AdvertiserInquiry) => {
 
 // --- Data Fetching ---
 
-export const searchGlobal = async (query: string) => {
+export interface UnifiedSearchResult {
+    news: NewsItem[];
+    editions: Editorial[];
+    videos: Video[];
+}
+
+export const searchGlobal = async (query: string): Promise<UnifiedSearchResult> => {
     try {
         const searchTerm = `%${query}%`;
 
@@ -97,7 +104,7 @@ export const searchGlobal = async (query: string) => {
                 .limit(5)
         ]);
 
-        // Map results to frontend types
+        // Map results if data exists
         const mappedNews = (news.data || []).map(mapNewsItem);
         const mappedEditions = (editions.data || []).map(mapEditorial);
         const mappedVideos = (videos.data || []).map(mapVideo);
@@ -126,45 +133,71 @@ export const fetchLatestNews = async (category?: string): Promise<NewsItem[]> =>
         query = query.eq('category', category);
     }
 
-    const { data, error } = await query;
+    try {
+        const { data, error } = await query;
+        if (error) throw error;
 
-    if (error) {
-        console.error('Error fetching news:', error);
+        await offlineStorage.set(`news_${category || 'all'}`, data);
+
+        return (data || []).map(item => ({
+            ...mapNewsItem(item),
+            author: item.author ? mapColumnist(item.author) : undefined
+        }));
+    } catch (error) {
+        console.warn('Network failed, trying offline cache for news...', error);
+        const cached = await offlineStorage.get(`news_${category || 'all'}`);
+        if (cached) {
+            return (cached || []).map((item: any) => ({
+                ...mapNewsItem(item),
+                author: item.author ? mapColumnist(item.author) : undefined
+            }));
+        }
         return [];
     }
-
-    return (data || []).map(item => ({
-        ...mapNewsItem(item),
-        author: item.author ? mapColumnist(item.author) : undefined
-    }));
 };
 
 export const fetchEditorials = async (): Promise<Editorial[]> => {
-    const { data, error } = await supabase
-        .from('editorials')
-        .select('*')
-        .order('published_at', { ascending: false });
+    try {
+        const { data, error } = await supabase
+            .from('editorials')
+            .select('*')
+            .order('published_at', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching editorials:', error);
+        if (error) throw error;
+
+        await offlineStorage.set('editorials_all', data);
+
+        return (data || []).map(mapEditorial);
+    } catch (error) {
+        console.warn('Network failed, trying offline cache for editorials...', error);
+        const cached = await offlineStorage.get('editorials_all');
+        if (cached) {
+            return (cached || []).map(mapEditorial);
+        }
         return [];
     }
-
-    return (data || []).map(mapEditorial);
 };
 
 export const fetchVideos = async (): Promise<Video[]> => {
-    const { data, error } = await supabase
-        .from('videos')
-        .select('*')
-        .order('published_at', { ascending: false });
+    try {
+        const { data, error } = await supabase
+            .from('videos')
+            .select('*')
+            .order('published_at', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching videos:', error);
+        if (error) throw error;
+
+        await offlineStorage.set('videos_all', data);
+
+        return (data || []).map(mapVideo);
+    } catch (error) {
+        console.warn('Network failed, trying offline cache for videos...', error);
+        const cached = await offlineStorage.get('videos_all');
+        if (cached) {
+            return (cached || []).map(mapVideo);
+        }
         return [];
     }
-
-    return (data || []).map(mapVideo);
 };
 
 export const fetchColumns = async (): Promise<Columnist[]> => {

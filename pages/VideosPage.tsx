@@ -4,6 +4,9 @@ import SectionHeader from '../components/SectionHeader';
 import { fetchVideos } from '../lib/supabaseClient';
 import { Video } from '../types';
 import ShareModal from '../components/ShareModal';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
+import { getOptimizedImageUrl } from '../lib/imageUtils';
 
 const VideosPage: React.FC = () => {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -45,13 +48,7 @@ const VideosPage: React.FC = () => {
     });
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="text-center font-serif text-xl animate-pulse text-accent uppercase tracking-[0.5em]">
-        Sincronizando Terminal...
-      </div>
-    </div>
-  );
+  // Removed blocking loading state
 
   return (
     <div className="container mx-auto px-8 md:px-16 lg:px-32 xl:px-48 py-24 md:py-48">
@@ -61,13 +58,29 @@ const VideosPage: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mt-16 md:mt-24">
-        {videos.length > 0 ? (
+        {loading ? (
+          Array(4).fill(0).map((_, i) => (
+            <div key={i} className="rounded-[3rem] md:rounded-[4rem] overflow-hidden aspect-video relative">
+              <Skeleton className="w-full h-full" variant="card" />
+              <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                <div className="flex justify-between">
+                  <Skeleton className="w-24 h-8" variant="circle" />
+                  <Skeleton className="w-16 h-8" variant="rect" />
+                </div>
+                <div className="space-y-4">
+                  <Skeleton className="h-8 w-3/4" variant="text" />
+                  <Skeleton className="h-4 w-1/2" variant="text" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : videos.length > 0 ? (
           videos.map(video => {
             const isSaved = savedVideos.includes(video.id);
             return (
               <div key={video.id} className="group relative bg-black rounded-[3rem] md:rounded-[4rem] overflow-hidden aspect-video shadow-2xl border border-gray-900 cursor-pointer">
                 <img
-                  src={video.imageUrl}
+                  src={getOptimizedImageUrl(video.imageUrl, 800)}
                   className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 grayscale group-hover:grayscale-0"
                   alt={video.title}
                   loading="lazy"
@@ -117,8 +130,8 @@ const VideosPage: React.FC = () => {
             );
           })
         ) : (
-          <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
-            <p className="text-[11px] font-black uppercase tracking-[0.5em] text-gray-300">Terminal Sincronizado: Nenhum vídeo disponível.</p>
+          <div className="col-span-full">
+            <EmptyState title="Nenhum vídeo disponível" description="Nenhum briefing visual foi encontrado no momento." />
           </div>
         )}
       </div>

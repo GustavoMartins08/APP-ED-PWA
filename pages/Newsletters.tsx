@@ -4,6 +4,9 @@ import SectionHeader from '../components/SectionHeader';
 import { Link } from 'react-router-dom';
 import NewsletterForm from '../components/NewsletterForm';
 import ShareModal from '../components/ShareModal';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
+import { PackageX } from 'lucide-react'; // Optional custom icon for empty state
 
 interface NewsletterSummary {
   id: string;
@@ -71,15 +74,7 @@ const Newsletters: React.FC = () => {
     ? newsletters
     : newsletters.filter(n => n.category === activeFilter);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white" role="status">
-        <div className="text-center font-serif text-xl md:text-2xl animate-pulse text-accent tracking-tighter uppercase">
-          Acessando Arquivo de Inteligência...
-        </div>
-      </div>
-    );
-  }
+  // Removed blocking loading check for better UX with Skeletons
 
   return (
     <div className="pb-32 pt-16 md:pt-24">
@@ -105,31 +100,58 @@ const Newsletters: React.FC = () => {
         </nav>
 
         <div className="space-y-10 md:space-y-16">
-          {filteredNewsletters.slice(0, 2).map((nl) => (
-            <NewsletterCard key={nl.id} nl={nl} />
-          ))}
-
-          <div className="bg-primary rounded-[2.5rem] p-6 sm:p-10 md:p-14 lg:p-16 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-accent/20 transition-all duration-1000"></div>
-            <div className="relative z-10 flex flex-col xl:flex-row gap-8 xl:gap-12 items-center">
-              <div className="xl:w-1/3 text-center xl:text-left space-y-4">
-                <span className="text-accent text-[10px] font-black uppercase tracking-[0.6em] block">Acesso Prioritário</span>
-                <h3 className="text-white font-serif text-2xl md:text-4xl font-black uppercase leading-[1.1] tracking-tighter">
-                  Receba a Próxima <br className="hidden xl:block" /> Edição no E-mail
-                </h3>
-                <p className="text-white/40 text-[11px] leading-relaxed italic max-w-sm mx-auto xl:mx-0">
-                  Junte-se a 15k+ líderes. Dados sintetizados, sem ruído, diretamente na sua caixa de entrada.
-                </p>
+          {loading ? (
+            Array(3).fill(0).map((_, i) => (
+              <div key={i} className="flex flex-col md:flex-row gap-8 md:gap-16 p-8 md:p-14 rounded-[2.5rem] bg-lightGray/30 border border-gray-50">
+                <div className="md:w-1/4 shrink-0 flex flex-col justify-between">
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-4" variant="text" />
+                    <Skeleton className="h-4 w-20" variant="text" />
+                  </div>
+                  <div className="mt-8 md:mt-0">
+                    <Skeleton className="w-10 h-10 rounded-full" variant="circle" />
+                  </div>
+                </div>
+                <div className="md:w-3/4 flex flex-col justify-center gap-4">
+                  <Skeleton className="h-12 w-full mb-2" variant="text" />
+                  <Skeleton className="h-16 w-full" variant="text" />
+                </div>
               </div>
-              <div className="xl:w-2/3 w-full flex justify-center">
-                <NewsletterForm variant="slim" />
-              </div>
-            </div>
-          </div>
+            ))
+          ) : filteredNewsletters.length > 0 ? (
+            <>
+              {filteredNewsletters.slice(0, 2).map((nl) => (
+                <NewsletterCard key={nl.id} nl={nl} />
+              ))}
 
-          {filteredNewsletters.slice(2).map((nl) => (
-            <NewsletterCard key={nl.id} nl={nl} />
-          ))}
+              <div className="bg-primary rounded-[2.5rem] p-6 sm:p-10 md:p-14 lg:p-16 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-accent/20 transition-all duration-1000"></div>
+                <div className="relative z-10 flex flex-col xl:flex-row gap-8 xl:gap-12 items-center">
+                  <div className="xl:w-1/3 text-center xl:text-left space-y-4">
+                    <span className="text-accent text-[10px] font-black uppercase tracking-[0.6em] block">Acesso Prioritário</span>
+                    <h3 className="text-white font-serif text-2xl md:text-4xl font-black uppercase leading-[1.1] tracking-tighter">
+                      Receba a Próxima <br className="hidden xl:block" /> Edição no E-mail
+                    </h3>
+                    <p className="text-white/40 text-[11px] leading-relaxed italic max-w-sm mx-auto xl:mx-0">
+                      Junte-se a 15k+ líderes. Dados sintetizados, sem ruído, diretamente na sua caixa de entrada.
+                    </p>
+                  </div>
+                  <div className="xl:w-2/3 w-full flex justify-center">
+                    <NewsletterForm variant="slim" />
+                  </div>
+                </div>
+              </div>
+
+              {filteredNewsletters.slice(2).map((nl) => (
+                <NewsletterCard key={nl.id} nl={nl} />
+              ))}
+            </>
+          ) : (
+            <EmptyState
+              title="Nenhuma newsletter encontrada"
+              description={`Não encontramos edições para a categoria "${activeFilter}". Tente outra estratégia de busca.`}
+            />
+          )}
         </div>
       </div>
     </div>

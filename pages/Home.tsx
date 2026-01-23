@@ -478,8 +478,8 @@ const Home: React.FC = () => {
             <div className="lg:w-[60%] p-10 md:p-16 xl:p-20 space-y-12 flex flex-col justify-center relative z-10">
               <div className="space-y-8">
                 <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase leading-[0.85] tracking-tighter">
-                  Assine a <br />
-                  <span className="text-accent block mt-2">Inteligência</span>.
+                  Assine <br />
+                  <span className="text-accent block mt-2">Já.</span>
                 </h2>
                 <p className="text-white/80 text-lg md:text-2xl font-light leading-relaxed max-w-2xl">
                   Junte-se à elite decisória global. Dados sintetizados sem ruído para seu crescimento exponencial.
