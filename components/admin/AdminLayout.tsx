@@ -38,7 +38,7 @@ const AdminLayout: React.FC = () => {
                 "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 md:relative md:translate-x-0",
                 isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             )}>
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col pt-[env(safe-area-inset-top)]">
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                         <span className="font-serif text-xl font-bold text-primary">ED Admin</span>
                         <button onClick={() => setIsSidebarOpen(false)} className="md:hidden">
@@ -81,7 +81,7 @@ const AdminLayout: React.FC = () => {
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
                 {/* Mobile Header */}
-                <header className="md:hidden h-16 bg-white border-b border-gray-200 flex items-center px-4">
+                <header className="md:hidden min-h-16 bg-white border-b border-gray-200 flex items-center px-4 pt-[env(safe-area-inset-top)]">
                     <button onClick={() => setIsSidebarOpen(true)}>
                         <Menu className="h-6 w-6 text-gray-600" />
                     </button>
