@@ -111,7 +111,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-[100] bg-white/95 backdrop-blur-2xl border-b border-gray-100/50" role="banner">
+      <header className="sticky top-0 z-[100] bg-white/95 backdrop-blur-2xl border-b border-gray-100/50 pt-[env(safe-area-inset-top)] transition-[padding]" role="banner">
         <div className="container mx-auto px-6 md:px-12 lg:px-16 xl:px-24 py-4 md:py-6 flex items-center justify-between relative z-[110] gap-4">
           <Link
             to="/"
@@ -199,7 +199,7 @@ const Header: React.FC = () => {
 
       {/* SEARCH OVERLAY - Performance Optimized */}
       <div
-        className={`fixed inset-0 z-[1000] bg-white transition-[transform,opacity] duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] flex flex-col will-change-composite gpu-accelerated ${isSearchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        className={`fixed inset-0 z-[1000] bg-white transition-[transform,opacity] duration-700 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] flex flex-col will-change-composite gpu-accelerated pt-[env(safe-area-inset-top)] ${isSearchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
           }`}
       >
         <div className="flex flex-col h-full overflow-hidden">
