@@ -19,11 +19,11 @@ export default defineConfig(({ mode }) => {
           name: 'Empresário Digital',
           short_name: 'Empresário',
           description: 'Inteligência de Mercado e Gestão',
-          theme_color: '#ffffff',
-          background_color: '#ffffff',
+          theme_color: '#111827',
+          background_color: '#111827',
           display: 'standalone',
-          start_url: '/',
-          orientation: 'portrait',
+          start_url: '/?source=pwa',
+          orientation: 'portrait-primary',
           icons: [
             {
               src: 'pwa-192x192.png',
