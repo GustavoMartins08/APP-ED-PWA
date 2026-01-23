@@ -11,8 +11,8 @@ const AdminLayout: React.FC = () => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate('/admin/login');
+        // Just exit admin mode, kept logged in as user
+        navigate('/perfil');
     };
 
     const navItems = [
