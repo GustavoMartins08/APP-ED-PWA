@@ -1,0 +1,986 @@
+{
+    "name": "RevistaED - Curadoria Automática",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "cronExpression",
+                            "expression": "0 7,11,15,19 * * *"
+                        }
+                    ]
+                }
+            },
+            "name": "Schedule Trigger - 4x Daily",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "189234-schedule"
+        },
+        {
+            "parameters": {
+                "url": "https://api.reddit.com/r/startups/hot",
+                "authentication": "none",
+                "options": {
+                    "splitIntoItems": false
+                },
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "User-Agent",
+                            "value": "RevistaED-Bot/1.0"
+                        }
+                    ]
+                },
+                "queryParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "limit",
+                            "value": "2"
+                        },
+                        {
+                            "name": "sort",
+                            "value": "hot"
+                        },
+                        {
+                            "name": "t",
+                            "value": "day"
+                        }
+                    ]
+                }
+            },
+            "name": "Reddit Sourcing",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                250,
+                -150
+            ],
+            "id": "23456-reddit"
+        },
+        {
+            "parameters": {
+                "url": "https://www.googleapis.com/youtube/v3/search",
+                "authentication": "none",
+                "options": {
+                    "splitIntoItems": false
+                },
+                "queryParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "key",
+                            "value": "{{ $env.YOUTUBE_API_KEY }}"
+                        },
+                        {
+                            "name": "q",
+                            "value": "startups AI innovation technology entrepreneurship investing"
+                        },
+                        {
+                            "name": "part",
+                            "value": "snippet"
+                        },
+                        {
+                            "name": "type",
+                            "value": "video"
+                        },
+                        {
+                            "name": "order",
+                            "value": "relevance"
+                        },
+                        {
+                            "name": "maxResults",
+                            "value": "8"
+                        },
+                        {
+                            "name": "publishedAfter",
+                            "value": "={{ $now.minus({days: 7}).toISO() }}"
+                        },
+                        {
+                            "name": "regionCode",
+                            "value": "BR"
+                        }
+                    ]
+                }
+            },
+            "name": "YouTube Sourcing",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                250,
+                50
+            ],
+            "id": "34567-youtube"
+        },
+        {
+            "parameters": {
+                "url": "https://linkedin-api7.p.rapidapi.com/search/posts",
+                "authentication": "none",
+                "options": {
+                    "splitIntoItems": false
+                },
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "x-rapidapi-key",
+                            "value": "{{ $env.RAPIDAPI_KEY }}"
+                        },
+                        {
+                            "name": "x-rapidapi-host",
+                            "value": "linkedin-api7.p.rapidapi.com"
+                        }
+                    ]
+                },
+                "queryParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "keywords",
+                            "value": "startup, innovation, AI, entrepreneurship, business"
+                        },
+                        {
+                            "name": "limit",
+                            "value": "8"
+                        },
+                        {
+                            "name": "enrich",
+                            "value": "true"
+                        }
+                    ]
+                }
+            },
+            "name": "LinkedIn Sourcing (RapidAPI)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                250,
+                250
+            ],
+            "id": "45678-linkedin"
+        },
+        {
+            "parameters": {
+                "url": "https://news.google.com/rss/search?q=startups+OR+innovation+OR+AI+OR+entrepreneur&hl=pt-BR&gl=BR&ceid=BR:pt"
+            },
+            "name": "Google News RSS",
+            "type": "n8n-nodes-base.rssFeedRead",
+            "typeVersion": 1,
+            "position": [
+                250,
+                450
+            ],
+            "id": "56789-rss"
+        },
+        {
+            "parameters": {},
+            "name": "Merge Results",
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 2.1,
+            "position": [
+                500,
+                150
+            ],
+            "id": "67890-merge"
+        },
+        {
+            "parameters": {
+                "jsCode": "const results = [];\n\n// Iterate over all input items\nfor (const item of $input.all()) {\n  const json = item.json;\n  \n  // Normalize Reddit\n  if (json.data && json.data.children) {\n    for (const child of json.data.children) {\n      const post = child.data;\n      results.push({\n        source: 'reddit',\n        original_title: post.title,\n        original_url: post.url,\n        original_description: post.selftext || post.title,\n        engagement_score: post.score,\n        created_at: new Date(post.created_utc * 1000).toISOString(),\n        niche: post.subreddit\n      });\n    }\n  }\n  \n  // Normalize YouTube\n  else if (json.items && json.items[0] && json.items[0].kind === 'youtube#searchResult') {\n    for (const video of json.items) {\n      results.push({\n        source: 'youtube',\n        original_title: video.snippet.title,\n        original_url: `https://www.youtube.com/watch?v=${video.id.videoId}`,\n        original_description: video.snippet.description,\n        engagement_score: 0, // Not available in search\n        created_at: video.snippet.publishedAt,\n        niche: 'video'\n      });\n    }\n  }\n  \n  // Normalize RSS (Google News)\n  else if (json.title && json.link && json.isoDate) {\n    // RSS Read node outputs items directly usually, check item structure\n    results.push({\n      source: 'google_news',\n      original_title: json.title,\n      original_url: json.link,\n      original_description: json.contentSnippet || json.content,\n      engagement_score: 0,\n      created_at: json.isoDate,\n      niche: 'news'\n    });\n  }\n\n  // LinkedIn normalization would act here if structure was known (using placeholder)\n  else if (json.data && Array.isArray(json.data)) {\n     for (const post of json.data) {\n         results.push({\n             source: 'linkedin',\n             original_title: post.text || 'LinkedIn Post',\n             original_url: post.url,\n             original_description: post.text,\n             engagement_score: 0,\n             created_at: new Date().toISOString(),\n             niche: 'business'\n         });\n     }\n  }\n}\n\nreturn results.map(item => ({ json: item }));"
+            },
+            "name": "Split & Normalize Posts",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                150
+            ],
+            "id": "78901-normalize"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Palavras-chave proibidas\nconst BLOCKED_KEYWORDS = [\n  'política', 'político', 'eleição', 'voto', 'governo',\n  'congresso', 'presidente', 'partido', 'senador', 'deputado'\n];\n\n// Nichos válidos\nconst VALID_NICHES = [\n  'negócios', 'startups', 'ia', 'inovação', 'carreira',\n  'tecnologia', 'empreendedorismo', 'investimento', 'mercado',\n  'ma', 'marketing', 'dados'\n];\n\nconst item = $input.item.json;\nconst text = `${item.original_title} ${item.original_description}`.toLowerCase();\n\n// Verifica bloqueados\nfor (const keyword of BLOCKED_KEYWORDS) {\n  if (text.includes(keyword)) {\n    return null; // Pula este item\n  }\n}\n\n// Valida niche (por heurística)\nconst hasValidNiche = VALID_NICHES.some(niche => text.includes(niche));\n\nif (!hasValidNiche && item.engagement_score < 1000) {\n    return []; // Filter out\n}\n\nreturn {\n  ...item,\n  filtered_at: new Date().toISOString()\n};"
+            },
+            "name": "Filter Political & Invalid Content",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                150
+            ],
+            "id": "89012-filter"
+        },
+        {
+            "parameters": {
+                "jsCode": "const crypto = require('crypto');\n\nconst item = $input.item.json;\n\n// Hash SHA-256 de (título + URL) para deduplicação\nconst input_string = `${item.original_title}|${item.original_url}`;\nconst hash = crypto\n  .createHash('sha256')\n  .update(input_string)\n  .digest('hex');\n\nreturn {\n  ...item,\n  content_hash: hash,\n  hash_created_at: new Date().toISOString()\n};"
+            },
+            "name": "Generate Dedup Hash",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1100,
+                150
+            ],
+            "id": "90123-hash"
+        },
+        {
+            "parameters": {
+                "url": "https://{{ $env.SUPABASE_URL }}/rest/v1/noticia_processada?content_hash=eq.{{ $json.content_hash }}",
+                "authentication": "genericCredentialType",
+                "genericCredentialType": "httpHeaderAuth",
+                "options": {},
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "apikey",
+                            "value": "{{ $env.SUPABASE_KEY }}"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer {{ $env.SUPABASE_KEY }}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                }
+            },
+            "name": "Check Supabase Dedup",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1300,
+                150
+            ],
+            "id": "01234-check-dedup"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{ $json.length > 0 }}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "name": "Is Duplicate?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                1500,
+                150
+            ],
+            "id": "12345-is-duplicate"
+        },
+        {
+            "parameters": {
+                "amount": 4,
+                "unit": "seconds"
+            },
+            "name": "Wait 4 Seconds (Rate Limit)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                1700,
+                100
+            ],
+            "id": "23456-wait"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
+                "authentication": "none",
+                "sendBody": true,
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "contents",
+                            "value": "={{ [ { parts: [ { text: `Você é o editor-chefe da Revista Empresário Digital (revistajornalista.com.br), uma publicação premium de inteligência de negócios para C-levels brasileiros.\\n\\nSEU NOME: Redator Automático - RevistaED\\nSEU OBJETIVO: Transformar notícias brutas (de Reddit, YouTube, LinkedIn, Google News) em artigos formatados, contextualizados e acionáveis para líderes empresariais.\\n\\nIDENTIDADE EDITORIAL:\\n- Tom: Executivo, direto, sem jargão técnico desnecessário\\n- Público-alvo: CEOs, CFOs, CTOs, CMOs com 15+ anos de experiência\\n- Foco: \"O que mudou?\", \"Por que meus negócios devem se importar?\", \"O que fazer?\"\\n- Comprimento: 450-550 palavras (máximo)\\n- Credibilidade: Sempre cite fontes, números, datas\\n\\nESTRUTURA OBRIGATÓRIA:\\n\\n# [TÍTULO EM PORTUGUÊS - MÁXIMO 12 PALAVRAS]\\n*Subtítulo opcional (itálico) - contexto de 1 linha*\\n\\n## Sumário Executivo\\nParágrafo único (2-3 frases):\\n- O que está acontecendo (fato principal)\\n- Por que importa (impacto direto para líderes)\\n- Ação recomendada (1 verbo específico)\\n\\n## Protagonistas\\nListar TODOS os nomes, cargos e empresas mencionadas.\\nFormato: **Nome Sobrenome** (Cargo, Empresa) [C-LEVEL]\\nMarcar [C-LEVEL] se: CEO, CFO, CTO, CMO, COO, President, Founder, VP, Director\\n\\n## Por Que Importa\\n2-3 parágrafos máximo.\\n\\n## Dados & Contexto\\n- Números específicos com fontes\\n- Datas exatas\\n- Links para mais informação (use URLs reais da notícia)\\n\\n## Próximos Passos (O que Monitorar?)\\n3-4 pontos em bullets.\\n\\nAGORA PROCESSE ESTE CONTEÚDO:\\n\\nTítulo: ${$json.original_title}\\nDescrição: ${$json.original_description}\\nFonte: ${$json.source}\\nURL: ${$json.original_url}` } ] } ] }}"
+                        },
+                        {
+                            "name": "generationConfig",
+                            "value": "{ \"temperature\": 0.7, \"topP\": 0.95, \"topK\": 64, \"maxOutputTokens\": 2048 }"
+                        }
+                    ]
+                },
+                "queryParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "key",
+                            "value": "{{ $env.GEMINI_API_KEY }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Gemini Content Generation",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1900,
+                100
+            ],
+            "id": "34567-gemini"
+        },
+        {
+            "parameters": {
+                "jsCode": "const item = $input.item.json;\nconst geminOutput = item.candidates?.[0]?.content?.parts?.[0]?.text || '';\n\n// Regex para encontrar nomes em seção \"Protagonistas\"\nconst protagonistasMatch = geminOutput.match(\n  /## Protagonistas\\n([\\s\\S]*?)(?=##|$)/i\n);\n\nconst cLevels = [];\n\nif (protagonistasMatch) {\n  const lines = protagonistasMatch[1].split('\\n');\n  \n  for (const line of lines) {\n    const match = line.match(/^- \\*\\*(.+?)\\*\\*\\s*\\((.+?),\\s*(.+?)\\)/) || line.match(/\\*\\*(.+?)\\*\\*\\s*\\((.+?),\\s*(.+?)\\)/);\n    if (match) {\n      const [_, name, title, company] = match;\n      \n      // Filtro: C-Level\n      const isCLevel = /ceo|cfo|cto|cmo|coo|founder|president|vice.?president/i.test(title);\n      \n      if (isCLevel) {\n        cLevels.push({\n          name: name.trim(),\n          title: title.trim(),\n          company: company.trim(),\n          source_niche: item.niche || 'general',\n          extracted_at: new Date().toISOString()\n        });\n      }\n    }\n  }\n}\n\n// Extração de Metadados para o App (Título, Slug, Summary)\nconst titleMatch = geminOutput.match(/^#\\s+(.+)$/m);\nconst finalTitle = titleMatch ? titleMatch[1].trim() : item.original_title;\n\n// Slug simples\nconst slug = finalTitle.toLowerCase()\n  .normalize('NFD').replace(/[\\u0300-\\u036f]/g, \"\")\n  .replace(/[^a-z0-9\\s-]/g, '')\n  .trim().replace(/\\s+/g, '-');\n\n// Summary (o primeiro parágrafo após \"Sumário Executivo\")\nconst summaryMatch = geminOutput.match(/## Sumário Executivo\\n([\\s\\S]*?)(?=\\n##|$)/i);\nconst summary = summaryMatch ? summaryMatch[1].trim() : item.original_description;\n\nreturn {\n  ...item,\n  gemini_response: geminOutput,\n  c_levels_found: cLevels,\n  c_levels_count: cLevels.length,\n  final_title: finalTitle,\n  slug: slug,\n  summary: summary\n};"
+            },
+            "name": "Extract C-Levels & Metadata",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2100,
+                100
+            ],
+            "id": "45678-extract"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://{{ $env.SUPABASE_URL }}/rest/v1/news_items",
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "apikey",
+                            "value": "{{ $env.SUPABASE_KEY }}"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer {{ $env.SUPABASE_KEY }}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "return=representation"
+                        }
+                    ]
+                },
+                "jsonParameters": true,
+                "bodyParametersJson": "={{ JSON.stringify({\n  title: $json.final_title,\n  slug: $json.slug,\n  excerpt: $json.summary,\n  content: $json.gemini_response,\n  category: $json.niche,\n  source: $json.source,\n  image_url: $json.original_url,\n  published_at: $now.toISO(),\n  is_premium: false,\n  visibility: 'public'\n}) }}"
+            },
+            "name": "Save Article to App",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                2300,
+                100
+            ],
+            "id": "50000-save-app"
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "c_levels_found"
+            },
+            "name": "Split C-Levels for Lusha",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 1,
+            "position": [
+                2500,
+                100
+            ],
+            "id": "56789-split-clevels"
+        },
+        {
+            "parameters": {
+                "url": "https://api.lusha.com/openapi/person/search",
+                "authentication": "none",
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "api_key",
+                            "value": "{{ $env.LUSHA_API_KEY }}"
+                        }
+                    ]
+                },
+                "queryParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "firstName",
+                            "value": "={{ $json.name.split(' ')[0] }}"
+                        },
+                        {
+                            "name": "lastName",
+                            "value": "={{ $json.name.split(' ').slice(1).join(' ') }}"
+                        },
+                        {
+                            "name": "company",
+                            "value": "={{ $json.company }}"
+                        }
+                    ]
+                }
+            },
+            "name": "Lusha Enrich - Person Search",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                2700,
+                100
+            ],
+            "id": "67890-lusha"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{ !!$json.person?.email }}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "name": "Lusha Found Valid Email?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                2900,
+                100
+            ],
+            "id": "78901-lusha-valid"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{ 'https://' + $env.SHARPSPRING_ACCOUNT_ID + '.api.sharpspring.com/v1/' }}",
+                "sendBody": true,
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "method",
+                            "value": "searchContacts"
+                        },
+                        {
+                            "name": "params",
+                            "value": "={{ { where: { emailAddress: $json.person.email }, limit: 1 } }}"
+                        },
+                        {
+                            "name": "id",
+                            "value": "={{ $execution.id }}"
+                        }
+                    ]
+                },
+                "queryParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "accountID",
+                            "value": "{{ $env.SHARPSPRING_ACCOUNT_ID }}"
+                        },
+                        {
+                            "name": "secretKey",
+                            "value": "{{ $env.SHARPSPRING_SECRET_KEY }}"
+                        }
+                    ]
+                }
+            },
+            "name": "SharpSpring Check Contact",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                3100,
+                100
+            ],
+            "id": "89012-ss-check"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{ $json.data && $json.data.contacts && $json.data.contacts.length > 0 }}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "name": "Contact Exists?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                3300,
+                100
+            ],
+            "id": "90123-contact-exists"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{ 'https://' + $env.SHARPSPRING_ACCOUNT_ID + '.api.sharpspring.com/v1/' }}",
+                "sendBody": true,
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "method",
+                            "value": "updateContact"
+                        },
+                        {
+                            "name": "params",
+                            "value": "={{ { id: $json.data.contacts[0].id, values: { firstName: $json.person.firstName, lastName: $json.person.lastName, title: $json.person.title, companyName: $json.person.company.name } } }}"
+                        },
+                        {
+                            "name": "id",
+                            "value": "={{ $execution.id }}"
+                        }
+                    ]
+                }
+            },
+            "name": "SharpSpring Update Contact",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                3500,
+                50
+            ],
+            "id": "01234-ss-update"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{ 'https://' + $env.SHARPSPRING_ACCOUNT_ID + '.api.sharpspring.com/v1/' }}",
+                "sendBody": true,
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "method",
+                            "value": "createContact"
+                        },
+                        {
+                            "name": "params",
+                            "value": "={{ { values: { emailAddress: $json.person.email, firstName: $json.person.firstName, lastName: $json.person.lastName, title: $json.person.title, companyName: $json.person.company.name, source: 'revista_ed_auto' } } }}"
+                        },
+                        {
+                            "name": "id",
+                            "value": "={{ $execution.id }}"
+                        }
+                    ]
+                }
+            },
+            "name": "SharpSpring Create Contact",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                3500,
+                250
+            ],
+            "id": "12345-ss-create"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{ 'https://' + $env.SHARPSPRING_ACCOUNT_ID + '.api.sharpspring.com/v1/' }}",
+                "sendBody": true,
+                "bodyParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "method",
+                            "value": "applyTemplate"
+                        },
+                        {
+                            "name": "params",
+                            "value": "={{ { contactId: $json.result?.data?.id || $json.data?.contacts?.[0]?.id, templateId: 12345, mergeVariables: { articleTitle: 'Novo Artigo Curado' } } }}"
+                        },
+                        {
+                            "name": "id",
+                            "value": "={{ $execution.id }}"
+                        }
+                    ]
+                }
+            },
+            "name": "SharpSpring Send Email Campaign",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                3800,
+                150
+            ],
+            "id": "23456-ss-email"
+        },
+        {
+            "parameters": {
+                "jsCode": "return {\n  execution_id: $execution.id,\n  status: 'success',\n  email_sent: true,\n  contact_email: $json.person?.email || 'unknown'\n};"
+            },
+            "name": "Prepare Log",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                4000,
+                150
+            ],
+            "id": "34567-prepare-log"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://{{ $env.SUPABASE_URL }}/rest/v1/execution_log",
+                "headerParametersUi": {
+                    "parameter": [
+                        {
+                            "name": "apikey",
+                            "value": "{{ $env.SUPABASE_KEY }}"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer {{ $env.SUPABASE_KEY }}"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "return=minimal"
+                        }
+                    ]
+                },
+                "jsonParameters": true,
+                "bodyParametersJson": "{{ JSON.stringify($json) }}"
+            },
+            "name": "Save Log to Supabase",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                4200,
+                150
+            ],
+            "id": "45678-save-log"
+        },
+        {
+            "parameters": {
+                "channel": "general",
+                "text": "={{ `Execution ${$execution.id} completed. Email sent to ${$json.contact_email}` }}",
+                "otherOptions": {}
+            },
+            "name": "Slack Notification",
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 2.1,
+            "position": [
+                4400,
+                150
+            ],
+            "id": "56789-slack"
+        }
+    ],
+    "connections": {
+        "Schedule Trigger - 4x Daily": {
+            "main": [
+                [
+                    {
+                        "node": "Reddit Sourcing",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "YouTube Sourcing",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "LinkedIn Sourcing (RapidAPI)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Google News RSS",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Reddit Sourcing": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "YouTube Sourcing": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "LinkedIn Sourcing (RapidAPI)": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        "Google News RSS": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Results",
+                        "type": "main",
+                        "index": 3
+                    }
+                ]
+            ]
+        },
+        "Merge Results": {
+            "main": [
+                [
+                    {
+                        "node": "Split & Normalize Posts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split & Normalize Posts": {
+            "main": [
+                [
+                    {
+                        "node": "Filter Political & Invalid Content",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filter Political & Invalid Content": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Dedup Hash",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Dedup Hash": {
+            "main": [
+                [
+                    {
+                        "node": "Check Supabase Dedup",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Supabase Dedup": {
+            "main": [
+                [
+                    {
+                        "node": "Is Duplicate?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Duplicate?": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Log",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Wait 4 Seconds (Rate Limit)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait 4 Seconds (Rate Limit)": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini Content Generation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini Content Generation": {
+            "main": [
+                [
+                    {
+                        "node": "Extract C-Levels & Metadata",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract C-Levels & Metadata": {
+            "main": [
+                [
+                    {
+                        "node": "Save Article to App",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Article to App": {
+            "main": [
+                [
+                    {
+                        "node": "Split C-Levels for Lusha",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split C-Levels for Lusha": {
+            "main": [
+                [
+                    {
+                        "node": "Lusha Enrich - Person Search",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lusha Enrich - Person Search": {
+            "main": [
+                [
+                    {
+                        "node": "Lusha Found Valid Email?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lusha Found Valid Email?": {
+            "main": [
+                [
+                    {
+                        "node": "SharpSpring Check Contact",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Prepare Log",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SharpSpring Check Contact": {
+            "main": [
+                [
+                    {
+                        "node": "Contact Exists?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Contact Exists?": {
+            "main": [
+                [
+                    {
+                        "node": "SharpSpring Update Contact",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "SharpSpring Create Contact",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SharpSpring Update Contact": {
+            "main": [
+                [
+                    {
+                        "node": "SharpSpring Send Email Campaign",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SharpSpring Create Contact": {
+            "main": [
+                [
+                    {
+                        "node": "SharpSpring Send Email Campaign",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SharpSpring Send Email Campaign": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Log",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Log": {
+            "main": [
+                [
+                    {
+                        "node": "Save Log to Supabase",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Log to Supabase": {
+            "main": [
+                [
+                    {
+                        "node": "Slack Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    }
+}
