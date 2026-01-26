@@ -20,7 +20,7 @@ const AdminLayout: React.FC = () => {
         { icon: Newspaper, label: 'Notícias & Artigos', path: '/admin/news' },
         { icon: Mail, label: 'Newsletters', path: '/admin/newsletters' },
         { icon: Video, label: 'Vídeos', path: '/admin/videos' },
-        { icon: BookOpen, label: 'Editoriais', path: '/admin/editorials' },
+        { icon: BookOpen, label: 'Edições Mensais', path: '/admin/editorials' },
         { icon: Users, label: 'Usuários & Leads', path: '/admin/users' },
     ];
 

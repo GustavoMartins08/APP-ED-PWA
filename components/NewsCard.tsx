@@ -8,9 +8,11 @@ interface NewsCardProps {
   item: NewsItem;
   variant?: 'horizontal' | 'vertical';
   index?: number;
+  linkPrefix?: string;
 }
 
-const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index = 0 }) => {
+const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index = 0, linkPrefix }) => {
+  // ... existing hooks ...
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -60,7 +62,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
   };
 
   const isNewsletter = item.category === 'Newsletter Semanal' || item.id.startsWith('nl_');
-  const basePath = isNewsletter ? '/newsletter' : '/artigo';
+  const basePath = linkPrefix || (isNewsletter ? '/newsletter' : '/artigo');
   const detailLink = `${basePath}/${item.id}`;
   const articleUrl = `${window.location.origin}${window.location.pathname}#${detailLink}`;
 

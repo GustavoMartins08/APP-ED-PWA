@@ -110,7 +110,7 @@ const PDFReader: React.FC<PDFReaderProps> = ({ url }) => {
                     <Page
                         pageNumber={pageNumber}
                         scale={scale}
-                        renderAnnotationLayer={false}
+                        renderAnnotationLayer={true}
                         renderTextLayer={false}
                         className="bg-white shadow-lg"
                         width={window.innerWidth > 768 ? 600 : window.innerWidth - 32}

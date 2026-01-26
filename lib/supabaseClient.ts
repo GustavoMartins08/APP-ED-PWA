@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { NewsletterSubscription, AdvertiserInquiry, NewsItem, Editorial, Video, Columnist } from '../types';
+import { NewsletterSubscription, AdvertiserInquiry, NewsItem, Editorial, Video, Columnist, NewsletterEdition } from '../types';
 import { offlineStorage } from './offlineStorage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -152,6 +152,38 @@ export const fetchLatestNews = async (category?: string): Promise<NewsItem[]> =>
                 author: item.author ? mapColumnist(item.author) : undefined
             }));
         }
+        return [];
+    }
+};
+
+export const fetchLatestNewsletters = async (): Promise<NewsletterEdition[]> => {
+    try {
+        const { data, error } = await supabase
+            .from('newsletter_editions')
+            .select(`
+                *,
+                items:newsletter_items_rel (
+                    news_items (*)
+                )
+            `)
+            .eq('published', true)
+            .order('date', { ascending: false })
+            .limit(10);
+
+        if (error) throw error;
+
+        return (data || []).map(item => ({
+            id: item.id,
+            title: item.title,
+            date: item.date,
+            coverImage: item.cover_image,
+            synthesis: item.synthesis,
+            pdfUrl: item.pdf_url,
+            published: item.published,
+            items: item.items?.map((rel: any) => mapNewsItem(rel.news_items)) || []
+        }));
+    } catch (error) {
+        console.error('Error fetching newsletters:', error);
         return [];
     }
 };

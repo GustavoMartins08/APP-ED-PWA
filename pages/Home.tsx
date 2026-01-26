@@ -5,7 +5,7 @@ import NewsCard from '../components/NewsCard';
 import NewsletterForm from '../components/NewsletterForm';
 import HeroCarousel from '../components/HeroCarousel';
 import ScrollLineDivider from '../components/ScrollLineDivider';
-import { fetchLatestNews, fetchEditorials, fetchVideos } from '../lib/supabaseClient';
+import { fetchLatestNews, fetchEditorials, fetchVideos, fetchLatestNewsletters } from '../lib/supabaseClient';
 import { getOptimizedImageUrl } from '../lib/imageUtils';
 import { NewsItem, Editorial, Video } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -89,8 +89,23 @@ const Home: React.FC = () => {
     };
 
     const loadNewsletters = async () => {
-      const data = await fetchLatestNews('Newsletter');
-      setNewsletters(data.length > 0 ? data : []);
+      const data = await fetchLatestNewsletters();
+      if (data.length > 0) {
+        // Map NewsletterEdition to NewsItem for display in Home cards
+        const mapped: NewsItem[] = data.map(ed => ({
+          id: ed.id,
+          title: ed.title,
+          excerpt: ed.synthesis,
+          category: 'Estratégia', // Default or derived
+          source: 'Web',
+          timestamp: ed.date,
+          imageUrl: ed.coverImage,
+          content: ''
+        }));
+        setNewsletters(mapped);
+      } else {
+        setNewsletters([]);
+      }
     };
 
     Promise.all([loadNews(), loadEditorials(), loadVideos(), loadNewsletters()])
@@ -243,7 +258,7 @@ const Home: React.FC = () => {
             ) : newsletters.length > 0 ? (
               newsletters.map((nl, idx) => (
                 <div key={nl.id} className="w-[85vw] md:w-[500px] shrink-0 snap-start snap-always">
-                  <NewsCard item={nl} index={idx} />
+                  <NewsCard item={nl} index={idx} linkPrefix="/newsletter" />
                 </div>
               ))
             ) : (

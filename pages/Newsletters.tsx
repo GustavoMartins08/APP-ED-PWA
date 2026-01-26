@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import SectionHeader from '../components/SectionHeader';
 import { Link } from 'react-router-dom';
 import NewsletterForm from '../components/NewsletterForm';
@@ -23,52 +24,40 @@ const Newsletters: React.FC = () => {
 
   const filters = ['Todos', 'Estratégia', 'Tecnologia', 'Venture Capital', 'Macro'];
 
-  const newsletters: NewsletterSummary[] = [
-    {
-      id: 'briefing-48',
-      title: 'Disrupção e Liderança 4.0',
-      date: '12 de Junho, 2024',
-      category: 'Estratégia',
-      synthesis: 'Como os agentes autônomos e a nova geopolítica dos semicondutores estão redefinindo o valor de mercado.',
-      insightCount: 8
-    },
-    {
-      id: 'briefing-47',
-      title: 'A Nova Era do Capitalismo Sustentável',
-      date: '05 de Junho, 2024',
-      category: 'Macro',
-      synthesis: 'Aporte recorde em ESG e a transição para economias de baixo carbono no Q3.',
-      insightCount: 8
-    },
-    {
-      id: 'briefing-46',
-      title: 'O Fim da Criptografia Tradicional',
-      date: '28 de Maio, 2024',
-      category: 'Tecnologia',
-      synthesis: 'Análise do marco da computação quântica e as implicações para a segurança cibernética global.',
-      insightCount: 8
-    },
-    {
-      id: 'briefing-45',
-      title: 'Startups e a Liquidez de 2024',
-      date: '21 de Maio, 2024',
-      category: 'Venture Capital',
-      synthesis: 'O retorno dos IPOs e as rodadas de investimento em logística e last-mile no Brasil.',
-      insightCount: 8
-    },
-    {
-      id: 'briefing-44',
-      title: 'Reskilling em Larga Escala',
-      date: '14 de Maio, 2024',
-      category: 'Estratégia',
-      synthesis: 'Preparando a força de trabalho para a colaboração homem-máquina em ambientes industriais.',
-      insightCount: 8
-    }
-  ];
+  const [newsletters, setNewsletters] = useState<NewsletterSummary[]>([]);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 800);
+    fetchNewsletters();
   }, []);
+
+  const fetchNewsletters = async () => {
+    setLoading(true);
+    // Fetch editions and count their items
+    const { data, error } = await supabase
+      .from('newsletter_editions')
+      .select('*, newsletter_items_rel(count)')
+      .eq('published', true)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching newsletters:', error);
+      setLoading(false);
+      return;
+    }
+
+    if (data) {
+      const formatted: NewsletterSummary[] = data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        date: new Date(item.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }),
+        category: 'Estratégia', // Default category for now as edition doesn't have one, or could be 'Geral'
+        synthesis: item.synthesis,
+        insightCount: item.newsletter_items_rel?.[0]?.count || 0
+      }));
+      setNewsletters(formatted);
+    }
+    setLoading(false);
+  };
 
   const filteredNewsletters = activeFilter === 'Todos'
     ? newsletters
