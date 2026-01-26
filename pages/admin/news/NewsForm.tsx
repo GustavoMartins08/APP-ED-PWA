@@ -131,6 +131,7 @@ const NewsForm: React.FC = () => {
         try {
             const dbData = {
                 ...data,
+                author_id: data.author_id || null, // Fix: convert empty string to null for UUID field
                 key_points: data.key_points?.map(k => k.value).filter(v => v) || [],
                 // Ensure published_at has time
                 published_at: new Date(data.published_at).toISOString()

@@ -17,6 +17,7 @@ const VideosPage: React.FC = () => {
     url: '',
     title: ''
   });
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
 
   useEffect(() => {
     fetchVideos().then(data => {
@@ -78,7 +79,11 @@ const VideosPage: React.FC = () => {
           videos.map(video => {
             const isSaved = savedVideos.includes(video.id);
             return (
-              <div key={video.id} className="group relative bg-black rounded-[3rem] md:rounded-[4rem] overflow-hidden aspect-video shadow-2xl border border-gray-900 cursor-pointer">
+              <div
+                key={video.id}
+                className="group relative bg-black rounded-[3rem] md:rounded-[4rem] overflow-hidden aspect-video shadow-2xl border border-gray-900 cursor-pointer"
+                onClick={() => setSelectedVideo(video)}
+              >
                 <img
                   src={getOptimizedImageUrl(video.imageUrl, 800)}
                   className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 grayscale group-hover:grayscale-0"
@@ -141,6 +146,35 @@ const VideosPage: React.FC = () => {
         url={shareData.url}
         title={shareData.title}
       />
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedVideo(null)}>
+          <div className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            {selectedVideo.youtube_id ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${selectedVideo.youtube_id}?autoplay=1`}
+                title={selectedVideo.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-white">
+                <p>Vídeo indisponível (ID inválido).</p>
+              </div>
+            )}
+            <button
+              onClick={() => setSelectedVideo(null)}
+              className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-white/20 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

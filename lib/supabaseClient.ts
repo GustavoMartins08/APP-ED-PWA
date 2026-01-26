@@ -293,7 +293,9 @@ const mapVideo = (item: any): Video => ({
     duration: item.duration,
     platform: item.platform,
     imageUrl: item.image_url,
-    category: item.category
+    category: item.category,
+    youtube_id: item.external_id,
+    is_premium: item.is_premium
 });
 
 const mapColumnist = (item: any): Columnist => ({

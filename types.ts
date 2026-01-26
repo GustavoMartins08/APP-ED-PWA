@@ -47,6 +47,8 @@ export interface Video {
   platform: string;
   imageUrl: string;
   category: string;
+  youtube_id?: string;
+  is_premium?: boolean;
 }
 
 export interface Columnist {

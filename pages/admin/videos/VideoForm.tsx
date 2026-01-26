@@ -23,7 +23,7 @@ const SimpleSwitch = ({ checked, onChange, label }: { checked: boolean, onChange
 const videoSchema = z.object({
     title: z.string().min(1, 'Título é obrigatório'),
     description: z.string().min(1, 'Descrição é obrigatória'),
-    youtube_id: z.string().min(1, 'ID do Youtube é obrigatório'),
+    external_id: z.string().min(1, 'ID do Youtube é obrigatório'),
     duration: z.string().min(1, 'Duração é obrigatória (ex: 10:30)'),
     category: z.string().min(1, 'Categoria é obrigatória'),
     platform: z.enum(['youtube', 'vimeo']),
@@ -33,6 +33,12 @@ const videoSchema = z.object({
 });
 
 type VideoFormData = z.infer<typeof videoSchema>;
+
+const getYoutubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+};
 
 const VideoForm: React.FC = () => {
     const { id } = useParams();
@@ -56,7 +62,7 @@ const VideoForm: React.FC = () => {
                 if (video) {
                     setValue('title', video.title);
                     setValue('description', video.description);
-                    setValue('youtube_id', video.youtube_id);
+                    setValue('external_id', video.external_id);
                     setValue('duration', video.duration);
                     setValue('category', video.category);
                     setValue('platform', video.platform || 'youtube');
@@ -98,7 +104,7 @@ const VideoForm: React.FC = () => {
     const fetchYoutubeData = async () => {
         // Implement logic to fetch title/thumb from youtube API if needed
         // For now just manually enter or auto-generate thumb url
-        const yId = watch('youtube_id');
+        const yId = watch('external_id');
         if (yId && !watch('image_url')) {
             setValue('image_url', `https://img.youtube.com/vi/${yId}/maxresdefault.jpg`);
         }
@@ -135,6 +141,14 @@ const VideoForm: React.FC = () => {
                 <Button variant="outline" size="icon" onClick={() => navigate('/admin/videos')}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
+                <Button type="button" variant="outline" size="icon" onClick={() => {
+                    const id = watch('external_id');
+                    if (id) {
+                        window.open(`https://youtube.com/watch?v=${id}`, '_blank');
+                    }
+                }}>
+                    <Youtube className="h-4 w-4" />
+                </Button>
                 <div>
                     <h1 className="text-2xl font-serif font-bold text-gray-900">{isEditing ? 'Editar Vídeo' : 'Novo Vídeo'}</h1>
                 </div>
@@ -151,14 +165,31 @@ const VideoForm: React.FC = () => {
                 <Card>
                     <CardContent className="p-6 space-y-4">
                         <div className="space-y-2">
-                            <Label>ID do Youtube</Label>
+                            <Label>Link do YouTube</Label>
                             <div className="flex gap-2">
-                                <Input {...register('youtube_id')} placeholder="Ex: dQw4w9WgXcQ" onBlur={fetchYoutubeData} />
-                                <Button type="button" variant="outline" size="icon" onClick={fetchYoutubeData}>
-                                    <Youtube className="h-4 w-4 text-red-600" />
-                                </Button>
+                                <Input
+                                    placeholder="Ex: https://www.youtube.com/watch?v=..."
+                                    onChange={async (e) => {
+                                        const url = e.target.value;
+                                        const id = getYoutubeId(url);
+                                        if (id) {
+                                            setValue('external_id', id);
+                                            // Fetch metadata
+                                            try {
+                                                const response = await fetch(`https://noembed.com/embed?url=${url}`);
+                                                const data = await response.json();
+                                                if (data.title && !watch('title')) setValue('title', data.title);
+                                                if (data.thumbnail_url && !watch('image_url')) setValue('image_url', data.thumbnail_url);
+                                                // Try to set author as description if empty, or just title
+                                            } catch (err) {
+                                                console.error("Failed to fetch metadata", err);
+                                            }
+                                        }
+                                    }}
+                                />
                             </div>
-                            {errors.youtube_id && <span className="text-xs text-red-500">{errors.youtube_id.message}</span>}
+                            <input type="hidden" {...register('external_id')} />
+                            {errors.external_id && <span className="text-xs text-red-500">Link inválido ou ID não encontrado.</span>}
                         </div>
 
                         <div className="space-y-2">
