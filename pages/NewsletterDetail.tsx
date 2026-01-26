@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { fetchLatestNews } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 import { NewsletterEdition, NewsItem } from '../types';
 import NewsletterForm from '../components/NewsletterForm';
 import ShareModal from '../components/ShareModal';
@@ -20,70 +20,73 @@ const NewsletterDetail: React.FC = () => {
     // ... existing useEffect ...
     const loadNewsletter = async () => {
       window.scrollTo(0, 0);
-      const newsBase = await fetchLatestNews();
 
-      const mockItems: NewsItem[] = [
-        // ... (mock items content kept same, implied) ...
-        {
-          ...newsBase[0],
-          id: 'n1',
-          title: 'A Ascensão dos Agentes Autônomos na Gestão de Fundos',
-          keyPoints: [
-            'IA agora opera 24/7 em mercados secundários sem supervisão humana.',
-            'Taxas de corretagem caíram 40% em corretoras que adotaram agentes nativos.',
-            'Necessidade urgente de auditoria algorítmica em tempo real.'
-          ]
-        },
-        {
-          ...newsBase[1],
-          id: 'n2',
-          title: 'Semicondutores: A Nova Geopolítica do Poder',
-          keyPoints: [
-            'China acelera produção doméstica de chips de 7nm.',
-            'EUA apertam restrições de exportação para chips de IA de alto desempenho.',
-            'Impacto direto no custo de servidores de nuvem para startups brasileiras.'
-          ]
-        },
-        {
-          ...newsBase[2],
-          id: 'n3',
-          title: 'Tokenização de Ativos Reais: O Fim dos Intermediários?',
-          keyPoints: [
-            'Imóveis fracionados via blockchain batem recorde de liquidez.',
-            'Bancos centrais testam integração de CBDCs com protocolos DeFi.',
-            'Redução de custos operacionais em transações cross-border.'
-          ]
-        },
-        {
-          ...newsBase[3],
-          id: 'n4',
-          title: 'Computação Quântica e a Quebra da Criptografia Atual',
-          keyPoints: [
-            'Google anuncia marco na correção de erros quânticos.',
-            'Cripto-agilidade torna-se prioridade para segurança cibernética corporativa.',
-            'Investimentos em criptografia pós-quântica aumentam 200%.'
-          ]
-        }
-      ];
+      // 1. Fetch Edition Metadata
+      const { data: editionData, error } = await supabase
+        .from('newsletter_editions')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-      const mockEdition: NewsletterEdition = {
-        id: id || 'current',
-        title: 'Newsletter Estratégica: O Próximo Ciclo de Inovação',
-        date: '12 de Junho, 2024',
-        coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
-        synthesis: 'Compilado técnico dos vetores de disrupção que estão redefinindo as fronteiras da eficiência operacional nesta quinzena.',
-        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // Example PDF for visualization
-        items: mockItems
+      if (error || !editionData) {
+        console.error('Error fetching edition:', error);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch Related Items in Order
+      const { data: rels, error: relsError } = await supabase
+        .from('newsletter_items_rel')
+        .select(`
+          order_index,
+          news_items (
+            *
+          )
+        `)
+        .eq('edition_id', id)
+        .order('order_index');
+
+      if (relsError) {
+        console.error('Error fetching items:', relsError);
+        setLoading(false);
+        return;
+      }
+
+      // 3. Map to Frontend Types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const items: NewsItem[] = (rels || []).map((r: any) => ({
+        id: r.news_items.id,
+        title: r.news_items.title,
+        excerpt: r.news_items.excerpt,
+        category: r.news_items.category,
+        source: r.news_items.source as any,
+        timestamp: r.news_items.published_at,
+        imageUrl: r.news_items.image_url,
+        content: r.news_items.content,
+        keyPoints: r.news_items.key_points // Assuming array in DB
+      }));
+
+      const fullEdition: NewsletterEdition = {
+        id: editionData.id,
+        title: editionData.title,
+        date: new Date(editionData.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        coverImage: editionData.cover_image,
+        synthesis: editionData.synthesis,
+        pdfUrl: editionData.pdf_url,
+        published: editionData.published,
+        items: items
       };
 
-      setEdition(mockEdition);
+      setEdition(fullEdition);
 
       const saved = JSON.parse(localStorage.getItem('saved_newsletters') || '[]');
       setIsSaved(saved.includes(id || 'current'));
 
       setLoading(false);
     };
-    loadNewsletter();
+    if (id) {
+      loadNewsletter();
+    }
   }, [id]);
 
   // ... (rest of methods)

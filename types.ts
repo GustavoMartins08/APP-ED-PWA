@@ -27,6 +27,7 @@ export interface NewsletterEdition {
   coverImage: string;
   synthesis: string;
   pdfUrl?: string;
+  published: boolean;
   items: NewsItem[];
 }
 

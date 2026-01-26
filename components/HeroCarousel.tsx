@@ -1,6 +1,13 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { NewsItem, Editorial } from '../types';
+
+interface HeroCarouselProps {
+  latestNews?: NewsItem;
+  latestNewsletter?: NewsItem;
+  latestEditorial?: Editorial;
+}
 
 interface Slide {
   id: string;
@@ -11,9 +18,10 @@ interface Slide {
   link: string;
   cta: string;
   accentTitle?: string;
+  customBgColor?: string;
 }
 
-const HeroCarousel: React.FC = () => {
+const HeroCarousel: React.FC<HeroCarouselProps> = ({ latestNews, latestNewsletter, latestEditorial }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -24,29 +32,30 @@ const HeroCarousel: React.FC = () => {
     {
       id: 'newsletter-main',
       theme: 'dark',
-      type: 'Newsletter Premium',
-      title: 'INTELIGÊNCIA SINTETIZADA',
-      subtitle: 'O briefing tático que define o ritmo do mercado global diretamente no seu terminal, sem ruído e com precisão absoluta.',
+      type: latestNewsletter?.category || 'Newsletter Premium',
+      title: latestNewsletter?.title || 'INTELIGÊNCIA SINTETIZADA',
+      subtitle: latestNewsletter?.excerpt || 'O briefing tático que define o ritmo do mercado global diretamente no seu terminal, sem ruído e com precisão absoluta.',
       link: '/subscribe-premium',
       cta: 'Acessar Terminal'
     },
     {
       id: 'editions-main',
-      theme: 'light',
+      theme: 'dark', // Changed to dark for better contrast with the specific color
       type: 'Edição Mensal',
-      title: 'DOSSIÊS DE ALTO IMPACTO',
-      subtitle: 'Mergulhe em análises verticais profundas sobre os vetores que estão moldando o futuro dos negócios e da tecnologia.',
-      link: '/edicoes',
-      cta: 'Explorar Edições'
+      title: latestEditorial?.theme || 'DOSSIÊS DE ALTO IMPACTO',
+      subtitle: latestEditorial?.summary || 'Mergulhe em análises verticais profundas sobre os vetores que estão moldando o futuro dos negócios e da tecnologia.',
+      link: latestEditorial ? `/edicao/${latestEditorial.id}` : '/edicoes',
+      cta: 'Explorar Edições',
+      customBgColor: '#ff2768'
     },
     {
       id: 'news-main',
       theme: 'dark',
-      type: 'Notícias de Mercado',
-      title: 'O PULSO DO MERCADO',
-      subtitle: 'Cobertura em tempo real com o rigor analítico que sua tomada de decisão exige para manter a vantagem competitiva.',
-      link: '/ultimas-noticias',
-      cta: 'Ler Notícias'
+      type: latestNews?.category || 'Notícias de Mercado',
+      title: latestNews?.title || 'O PULSO DO MERCADO',
+      subtitle: latestNews?.excerpt || 'Cobertura em tempo real com o rigor analítico que sua tomada de decisão exige para manter a vantagem competitiva.',
+      link: latestNews ? `/noticia/${latestNews.id}` : '/ultimas-noticias',
+      cta: 'Ler Notícia'
     },
     {
       id: 'newsletter-60s',
@@ -89,10 +98,23 @@ const HeroCarousel: React.FC = () => {
     setIsDragging(false);
   };
 
+  const getSlideStyle = (slide: Slide) => {
+    if (slide.customBgColor) {
+      return { backgroundColor: slide.customBgColor };
+    }
+    return {};
+  };
+
+  const getSlideClasses = (slide: Slide) => {
+    if (slide.customBgColor) return '';
+    return slide.theme === 'dark' ? 'bg-black' : 'bg-white';
+  };
+
   return (
     <section
-      className={`relative h-[65vh] md:h-[75vh] lg:h-[80vh] w-full overflow-hidden select-none transition-colors duration-1000 ${slides[currentSlide].theme === 'dark' ? 'bg-black' : 'bg-white'
+      className={`relative h-[65vh] md:h-[75vh] lg:h-[80vh] w-full overflow-hidden select-none transition-colors duration-1000 ${getSlideClasses(slides[currentSlide])
         } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      style={getSlideStyle(slides[currentSlide])}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => { setIsPaused(false); setIsDragging(false); dragStartX.current = null; }}
       onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
@@ -130,8 +152,8 @@ const HeroCarousel: React.FC = () => {
               <button
                 onClick={(e) => { e.stopPropagation(); navigate(slide.link); }}
                 className={`px-8 py-4 md:px-12 md:py-5 rounded-full text-[10px] md:text-[12px] font-black uppercase tracking-[0.25em] transition-all shadow-xl active:scale-95 flex items-center gap-4 group ${slide.theme === 'dark'
-                    ? 'bg-white text-primary hover:bg-accent hover:text-white'
-                    : 'bg-primary text-white hover:bg-accent'
+                  ? 'bg-white text-primary hover:bg-accent hover:text-white'
+                  : 'bg-primary text-white hover:bg-accent'
                   }`}
               >
                 {slide.cta}
@@ -143,8 +165,11 @@ const HeroCarousel: React.FC = () => {
           </div>
 
           {/* Subtle decoration */}
-          <div className={`absolute right-[-5%] top-1/2 -translate-y-1/2 w-[40vh] h-[40vh] md:w-[60vh] md:h-[60vh] rounded-full blur-[80px] md:blur-[120px] opacity-10 md:opacity-20 pointer-events-none transition-colors duration-1000 ${slide.theme === 'dark' ? 'bg-accent' : 'bg-primary'
-            }`} />
+          {!slide.customBgColor && (
+            <div className={`absolute right-[-5%] top-1/2 -translate-y-1/2 w-[40vh] h-[40vh] md:w-[60vh] md:h-[60vh] rounded-full blur-[80px] md:blur-[120px] opacity-10 md:opacity-20 pointer-events-none transition-colors duration-1000 ${slide.theme === 'dark' ? 'bg-accent' : 'bg-primary'
+              }`} />
+          )}
+
         </div>
       ))}
 
@@ -171,8 +196,8 @@ const HeroCarousel: React.FC = () => {
         <button
           onClick={(e) => { e.stopPropagation(); prevSlide(); }}
           className={`pointer-events-auto w-12 h-12 lg:w-16 lg:h-16 rounded-full border transition-all flex items-center justify-center group ${slides[currentSlide].theme === 'dark'
-              ? 'border-white/10 text-white hover:bg-white hover:text-primary'
-              : 'border-primary/10 text-primary hover:bg-primary hover:text-white'
+            ? 'border-white/10 text-white hover:bg-white hover:text-primary'
+            : 'border-primary/10 text-primary hover:bg-primary hover:text-white'
             }`}
         >
           <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
@@ -180,8 +205,8 @@ const HeroCarousel: React.FC = () => {
         <button
           onClick={(e) => { e.stopPropagation(); nextSlide(); }}
           className={`pointer-events-auto w-12 h-12 lg:w-16 lg:h-16 rounded-full border transition-all flex items-center justify-center group ${slides[currentSlide].theme === 'dark'
-              ? 'border-white/10 text-white hover:bg-white hover:text-primary'
-              : 'border-primary/10 text-primary hover:bg-primary hover:text-white'
+            ? 'border-white/10 text-white hover:bg-white hover:text-primary'
+            : 'border-primary/10 text-primary hover:bg-primary hover:text-white'
             }`}
         >
           <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>

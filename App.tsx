@@ -29,6 +29,8 @@ const VideoForm = React.lazy(() => import('./pages/admin/videos/VideoForm'));
 const EditorialList = React.lazy(() => import('./pages/admin/editorials/EditorialList'));
 const EditorialForm = React.lazy(() => import('./pages/admin/editorials/EditorialForm'));
 const UserList = React.lazy(() => import('./pages/admin/users/UserList'));
+const NewsletterList = React.lazy(() => import('./pages/admin/newsletters/NewsletterList'));
+const NewsletterForm = React.lazy(() => import('./pages/admin/newsletters/NewsletterForm'));
 
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
@@ -83,6 +85,10 @@ const App: React.FC = () => {
 
               {/* Users Module */}
               <Route path="users" element={<UserList />} />
+
+              {/* Newsletter Module */}
+              <Route path="newsletters" element={<NewsletterList />} />
+              <Route path="newsletters/:id" element={<NewsletterForm />} />
 
               <Route path="" element={<AdminDashboard />} />
             </Route>

@@ -70,7 +70,8 @@ const EditionDetail: React.FC = () => {
                 coverImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
                 synthesis: 'Compilado técnico dos vetores de disrupção que estão redefinindo as fronteiras da eficiência operacional nesta quinzena.',
                 pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // PDF strictly included
-                items: mockItems
+                items: mockItems,
+                published: true
             };
 
             setEdition(mockEdition);

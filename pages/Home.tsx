@@ -89,14 +89,8 @@ const Home: React.FC = () => {
     };
 
     const loadNewsletters = async () => {
-      const data = await fetchLatestNews(); // In real app, fetchNewsletters()
-      const mockNewsletters = data.map(n => ({
-        ...n,
-        id: 'nl_' + n.id,
-        category: 'Newsletter Semanal',
-        title: 'Edição: ' + n.title
-      }));
-      setNewsletters(mockNewsletters);
+      const data = await fetchLatestNews('Newsletter');
+      setNewsletters(data.length > 0 ? data : []);
     };
 
     Promise.all([loadNews(), loadEditorials(), loadVideos(), loadNewsletters()])
@@ -201,7 +195,11 @@ const Home: React.FC = () => {
     <div className="space-y-4 md:space-y-8 lg:space-y-12 pb-24 overflow-x-hidden">
 
       {/* Hero Carousel */}
-      <HeroCarousel />
+      <HeroCarousel
+        latestNews={news[0]}
+        latestNewsletter={newsletters[0]}
+        latestEditorial={editorials[0]}
+      />
 
       <ScrollLineDivider />
 
