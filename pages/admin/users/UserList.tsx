@@ -119,10 +119,13 @@ const UserList: React.FC = () => {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Button
-                                            variant="ghost"
+                                            variant="outline"
                                             size="sm"
                                             onClick={() => toggleRole(user.id, user.role || 'user')}
-                                            className={user.role === 'admin' ? "text-red-600 hover:text-red-700 hover:bg-red-50" : "text-green-600 hover:text-green-700 hover:bg-green-50"}
+                                            className={user.role === 'admin'
+                                                ? "text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                                : "text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                                            }
                                         >
                                             {user.role === 'admin' ? (
                                                 <>

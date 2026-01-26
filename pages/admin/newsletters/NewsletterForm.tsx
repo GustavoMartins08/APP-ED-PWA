@@ -216,7 +216,7 @@ const NewsletterForm: React.FC = () => {
     return (
         <div className="space-y-6 max-w-7xl mx-auto pb-20">
             <div className="flex items-center gap-4 border-b border-gray-100 pb-6">
-                <Button variant="ghost" size="icon" onClick={() => navigate('/admin/newsletters')}>
+                <Button variant="outline" size="icon" onClick={() => navigate('/admin/newsletters')}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -225,7 +225,7 @@ const NewsletterForm: React.FC = () => {
                 </div>
                 <div className="ml-auto flex gap-2">
                     <Button variant="secondary" onClick={() => navigate('/admin/newsletters')}>Cancelar</Button>
-                    <Button onClick={handleSubmit(onSubmit as any)} disabled={loading} className="bg-primary">
+                    <Button onClick={handleSubmit(onSubmit as any)} disabled={loading} className="bg-primary text-white hover:bg-primary/90">
                         <Save className="h-4 w-4 mr-2" />
                         {loading ? 'Salvando...' : 'Salvar Edição'}
                     </Button>
@@ -267,6 +267,7 @@ const NewsletterForm: React.FC = () => {
                                         <div className="text-gray-400"><Upload className="mx-auto mb-2" />Upload Capa</div>
                                     )}
                                 </div>
+                                {errors.cover_image && <span className="text-xs text-red-500 block mt-1">{errors.cover_image.message}</span>}
                             </div>
 
                             <div className="space-y-2">
@@ -367,7 +368,7 @@ const NewsletterForm: React.FC = () => {
                                                 )}
                                             </div>
 
-                                            <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="text-gray-300 hover:text-red-500">
+                                            <Button variant="outline" size="icon" onClick={() => removeItem(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>

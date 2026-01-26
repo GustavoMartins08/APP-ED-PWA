@@ -56,7 +56,7 @@ const VideoList: React.FC = () => {
                     <p className="text-gray-500">Gerencie a biblioteca de vídeos (Youtube ou Upload).</p>
                 </div>
                 <Link to="/admin/videos/new">
-                    <Button><Plus className="h-4 w-4 mr-2" /> Novo Vídeo</Button>
+                    <Button className="bg-primary text-white hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" /> Novo Vídeo</Button>
                 </Link>
             </div>
 
@@ -116,12 +116,12 @@ const VideoList: React.FC = () => {
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             <Link to={`/admin/videos/${item.id}`}>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
+                                                <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"><Edit className="h-4 w-4" /></Button>
                                             </Link>
                                             <Button
-                                                variant="ghost"
+                                                variant="outline"
                                                 size="icon"
-                                                className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                                                 onClick={() => handleDelete(item.id)}
                                             >
                                                 <Trash2 className="h-4 w-4" />

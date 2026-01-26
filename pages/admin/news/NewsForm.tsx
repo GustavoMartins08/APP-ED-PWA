@@ -156,7 +156,7 @@ const NewsForm: React.FC = () => {
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-20">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => navigate('/admin/news')}>
+                <Button variant="outline" size="icon" onClick={() => navigate('/admin/news')}>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div>
@@ -164,7 +164,7 @@ const NewsForm: React.FC = () => {
                 </div>
                 <div className="ml-auto flex gap-2">
                     <Button variant="secondary" onClick={() => navigate('/admin/news')}>Cancelar</Button>
-                    <Button onClick={handleSubmit(onSubmit)} disabled={loading}>
+                    <Button onClick={handleSubmit(onSubmit)} disabled={loading} className="bg-primary text-white hover:bg-primary/90">
                         <Save className="h-4 w-4 mr-2" />
                         {loading ? 'Salvando...' : 'Salvar Notícia'}
                     </Button>

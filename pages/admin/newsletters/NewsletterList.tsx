@@ -51,7 +51,7 @@ const NewsletterList: React.FC = () => {
                     <h1 className="text-3xl font-serif font-bold text-gray-900">Gestão de Newsletters</h1>
                     <p className="text-gray-500 mt-1">Gerencie as edições quinzenais e seus conteúdos.</p>
                 </div>
-                <Button onClick={() => navigate('/admin/newsletters/new')} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => navigate('/admin/newsletters/new')} className="bg-primary text-white hover:bg-primary/90">
                     <Plus className="h-4 w-4 mr-2" /> Nova Edição
                 </Button>
             </div>
@@ -99,11 +99,11 @@ const NewsletterList: React.FC = () => {
                                             </td>
                                             <td className="py-3 px-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Button variant="ghost" size="icon" onClick={() => navigate(`/admin/newsletters/${edition.id}`)}>
-                                                        <Edit className="h-4 w-4 text-gray-600" />
+                                                    <Button variant="outline" size="icon" onClick={() => navigate(`/admin/newsletters/${edition.id}`)} className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200">
+                                                        <Edit className="h-4 w-4" />
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(edition.id)}>
-                                                        <Trash2 className="h-4 w-4 text-red-400" />
+                                                    <Button variant="outline" size="icon" onClick={() => handleDelete(edition.id)} className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </td>
