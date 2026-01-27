@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Newspaper, Video, BookOpen, Users, LogOut, Menu, X, Mail } from 'lucide-react';
+import { LayoutDashboard, Newspaper, Video, BookOpen, Users, LogOut, Menu, X, Mail, PenTool } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
@@ -18,6 +18,7 @@ const AdminLayout: React.FC = () => {
     const navItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
         { icon: Newspaper, label: 'Notícias & Artigos', path: '/admin/news' },
+        { icon: PenTool, label: 'Colunistas', path: '/admin/columnists' },
         { icon: Mail, label: 'Newsletters', path: '/admin/newsletters' },
         { icon: Video, label: 'Vídeos', path: '/admin/videos' },
         { icon: BookOpen, label: 'Edições Mensais', path: '/admin/editorials' },

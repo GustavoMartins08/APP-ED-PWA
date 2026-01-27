@@ -31,6 +31,8 @@ const EditorialForm = React.lazy(() => import('./pages/admin/editorials/Editoria
 const UserList = React.lazy(() => import('./pages/admin/users/UserList'));
 const NewsletterList = React.lazy(() => import('./pages/admin/newsletters/NewsletterList'));
 const NewsletterForm = React.lazy(() => import('./pages/admin/newsletters/NewsletterForm'));
+const ColumnistList = React.lazy(() => import('./pages/admin/columnists/ColumnistList'));
+const ColumnistForm = React.lazy(() => import('./pages/admin/columnists/ColumnistForm'));
 
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
@@ -82,6 +84,10 @@ const App: React.FC = () => {
               {/* Editorial Module */}
               <Route path="editorials" element={<EditorialList />} />
               <Route path="editorials/:id" element={<EditorialForm />} />
+
+              {/* Columnists Module */}
+              <Route path="columnists" element={<ColumnistList />} />
+              <Route path="columnists/:id" element={<ColumnistForm />} />
 
               {/* Users Module */}
               <Route path="users" element={<UserList />} />
