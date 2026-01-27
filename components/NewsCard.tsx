@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { NewsItem } from '../types';
 import ShareModal from './ShareModal';
+import { Bookmark, Share2 } from 'lucide-react';
 
 interface NewsCardProps {
   item: NewsItem;
@@ -79,7 +80,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
               alt={item.title}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 w-full h-full object-cover object-center grayscale group-hover:grayscale-0 group-hover:scale-105 transition-[filter,transform] duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+              className="absolute inset-0 w-full h-full object-cover object-center grayscale group-hover:grayscale-0 group-hover:scale-105 transition-[filter,transform] duration-500 ease-out"
             />
           </div>
           <div className="flex-grow pt-2 sm:pt-0">
@@ -96,17 +97,16 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{item.timestamp}</span>
               <div className="flex gap-4">
                 <button
-                  onClick={toggleSave}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isSaved ? 'bg-accent text-white shadow-lg' : 'text-gray-400 hover:text-accent'}`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 touch-manipulation ${isSaved ? 'bg-accent text-white shadow-lg' : 'text-gray-400 hover:text-accent'}`}
                 >
-                  <svg className="w-3.5 h-3.5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                  <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} strokeWidth={2.5} />
                   <span className="hidden sm:inline">{isSaved ? 'Salvo' : 'Salvar'}</span>
                 </button>
                 <button
                   onClick={handleShareClick}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-accent transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-accent transition-all active:scale-95 touch-manipulation"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                  <Share2 className="w-3.5 h-3.5" strokeWidth={2.5} />
                   <span className="hidden sm:inline">Compartilhar</span>
                 </button>
               </div>
@@ -121,7 +121,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
   return (
     <div
       ref={cardRef}
-      className={`h-full flex flex-col rounded-[2.5rem] md:rounded-[3rem] overflow-hidden group shadow-sm border border-gray-100 hover:shadow-2xl hover:border-accent/10 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] bg-white gpu-accelerated ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
+      className={`h-full flex flex-col rounded-[2.5rem] md:rounded-[3rem] overflow-hidden group shadow-sm border border-gray-100 hover:shadow-md hover:border-accent/10 transition-all duration-500 ease-out bg-white gpu-accelerated ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'}`}
       style={{ transitionDelay: `${index % 4 * 100}ms` }}
     >
       <Link to={detailLink} state={{ showPdf: false }} className="block h-full flex flex-col">
@@ -131,7 +131,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
             alt={item.title}
             loading="lazy"
             decoding="async"
-            className="absolute inset-0 w-full h-full object-cover object-center grayscale group-hover:grayscale-0 group-hover:scale-110 transition-[filter,transform] duration-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="absolute inset-0 w-full h-full object-cover object-center grayscale group-hover:grayscale-0 group-hover:scale-110 transition-[filter,transform] duration-500 ease-out"
           />
         </div>
 
@@ -151,16 +151,16 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
           <div className="flex flex-wrap gap-4 mb-8">
             <button
               onClick={toggleSave}
-              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isSaved ? 'bg-accent text-white shadow-lg' : 'bg-lightGray text-primary hover:bg-accent hover:text-white'}`}
+              className={`flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 touch-manipulation ${isSaved ? 'bg-accent text-white shadow-lg' : 'bg-lightGray text-primary hover:bg-accent hover:text-white'}`}
             >
-              <svg className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+              <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} strokeWidth={2.5} />
               {isSaved ? 'Salvo' : 'Salvar'}
             </button>
             <button
               onClick={handleShareClick}
-              className="flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-lightGray text-primary hover:bg-accent hover:text-white transition-all"
+              className="flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-lightGray text-primary hover:bg-accent hover:text-white transition-all active:scale-95 touch-manipulation"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              <Share2 className="w-4 h-4" strokeWidth={2.5} />
               Compartilhar
             </button>
           </div>

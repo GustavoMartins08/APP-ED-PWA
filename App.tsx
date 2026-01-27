@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { HashRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
 import ReloadPrompt from './components/ReloadPrompt';
+import AnalyticsTracker from './components/AnalyticsTracker';
 
 // Public Pages (Lazy Loaded)
 const Home = React.lazy(() => import('./pages/Home'));
@@ -37,15 +38,31 @@ const ColumnistForm = React.lazy(() => import('./pages/admin/columnists/Columnis
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
 
+import Skeleton from './components/ui/Skeleton';
+
 const LoadingFallback: React.FC = () => (
-  <div className="flex h-screen w-full items-center justify-center bg-white">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-accent" />
+  <div className="min-h-screen bg-white pb-20">
+    <div className="h-20 w-full bg-white border-b border-gray-100 flex items-center px-4 sticky top-0 z-50">
+      <div className="container mx-auto flex items-center justify-between">
+        <Skeleton variant="rect" className="h-8 w-32" />
+        <Skeleton variant="circle" className="h-10 w-10 hidden md:block" />
+      </div>
+    </div>
+    <div className="container mx-auto px-4 py-8 space-y-8 animate-pulse">
+      <div className="w-full bg-gray-100 rounded-[2rem] aspect-video md:aspect-[21/9]" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="h-[400px] bg-gray-100 rounded-[2.5rem]" />
+        <div className="h-[400px] bg-gray-100 rounded-[2.5rem]" />
+        <div className="h-[400px] bg-gray-100 rounded-[2.5rem] hidden lg:block" />
+      </div>
+    </div>
   </div>
 );
 
 const App: React.FC = () => {
   return (
     <Router>
+      <AnalyticsTracker />
       <ReloadPrompt />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
