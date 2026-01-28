@@ -486,32 +486,20 @@ const Home: React.FC = () => {
         ref={el => sectionRefs.current['cta-section'] = el}
         className={`container mx-auto px-6 md:px-12 lg:px-16 xl:px-24 pb-16 ${revealClass('cta-section')}`}
       >
-        <div className="bg-primary rounded-[3rem] md:rounded-[8rem] relative group overflow-hidden shadow-2xl border border-white/5">
-          <div className="absolute inset-0 bg-accent/5 pointer-events-none group-hover:bg-accent/10 transition-all duration-1000"></div>
-          <div className="flex flex-col lg:flex-row items-stretch">
-            <div className="lg:w-[60%] p-10 md:p-16 xl:p-20 space-y-12 flex flex-col justify-center relative z-10">
-              <div className="space-y-8">
-                <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl font-black text-white uppercase leading-[0.85] tracking-tighter">
-                  Assine <br />
-                  <span className="text-accent block mt-2">Já.</span>
-                </h2>
-                <p className="text-white/80 text-lg md:text-2xl font-light leading-relaxed max-w-2xl">
-                  Junte-se à elite decisória global. Dados sintetizados sem ruído para seu crescimento exponencial.
-                </p>
-              </div>
-              <div className="w-full">
-                <NewsletterForm variant="card" theme="dark" />
-              </div>
+        <div className="bg-primary rounded-[2.5rem] p-6 sm:p-10 md:p-14 lg:p-16 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-accent/20 transition-all duration-1000"></div>
+          <div className="relative z-10 flex flex-col xl:flex-row gap-8 xl:gap-12 items-center">
+            <div className="xl:w-1/3 text-center xl:text-left space-y-4">
+              <span className="text-accent text-[10px] font-black uppercase tracking-[0.6em] block">Acesso Prioritário</span>
+              <h3 className="text-white font-serif text-2xl md:text-4xl font-black uppercase leading-[1.1] tracking-tighter">
+                Receba a Próxima <br className="hidden xl:block" /> Edição no E-mail
+              </h3>
+              <p className="text-white/40 text-[11px] leading-relaxed italic max-w-sm mx-auto xl:mx-0">
+                Junte-se a 15k+ líderes. Dados sintetizados, sem ruído, diretamente na sua caixa de entrada.
+              </p>
             </div>
-            <div className="lg:w-[40%] w-full min-h-[400px] lg:min-h-full relative grayscale group-hover:grayscale-0 transition-all duration-1000 overflow-hidden">
-              <img
-                src={getOptimizedImageUrl("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200", 800)}
-                alt="Inteligência Estratégica"
-                className="absolute inset-0 w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/20 lg:bg-none"></div>
+            <div className="xl:w-2/3 w-full flex justify-center">
+              <NewsletterForm variant="slim" />
             </div>
           </div>
         </div>
