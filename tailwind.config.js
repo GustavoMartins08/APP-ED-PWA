@@ -21,7 +21,7 @@ export default {
             },
             animation: {
                 'subtle-pulse': 'subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                'fade-in': 'fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                 'loading-bar': 'loadingBar 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite',
                 'scroll-line': 'scrollLine 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite',
             },

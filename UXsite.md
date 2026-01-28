@@ -1,108 +1,93 @@
-# Especificação de Melhorias de UX/UI e Performance
+# Especificação de Melhorias UX/UI e Performance
 
-Este documento detalha o plano de implementação para elevar a qualidade visual, interativa e de performance da aplicação "Empresário Digital". O foco principal é a otimização para dispositivos móveis, velocidade de carregamento e refinamento estético.
+Este documento detalha o plano de implementação para elevar a experiência do usuário (UX), refinar a interface (UI) e otimizar radicalmente a performance do app "Empresário Digital". O foco é eliminar a sensação de lentidão, corrigir falhas visuais de carregamento (glitches) e garantir uma navegação fluida em mobile.
 
----
+## 1. Diagnóstico de Performance e UX
 
-## 1. Performance e Arquitetura (Prioridade Alta)
+### 1.1 O Problema do "Cache / Banner Antigo"
+**Sintoma:** Ao abrir o app, o usuário vê um banner com informações genéricas (ex: "INTELIGÊNCIA SINTETIZADA") que subitamente troca para o conteúdo real.
+**Causa:** O componente `HeroCarousel` é renderizado imediatamente com dados "default" (hardcoded) enquanto a requisição de rede (`fetchLatestNews`) ainda está em andamento. Não é um problema de cache do navegador, mas sim uma estratégia de inicialização incorreta que exibe dados fictícios como se fossem reais.
+**Solução Planejada:** Implementar estado de carregamento explícito (Skeleton Loading) no Banner Principal.
 
-A base para uma boa UX é a velocidade. Atualmente, a aplicação utiliza Tailwind CSS via CDN, o que é inseguro para produção, impede otimizações de performance e causa "flashes" de conteúdo não estilizado.
+### 1.2 Lentidão ao Arrastar (Drag)
+**Sintoma:** A animação do carrossel parece "pesada" ou atrasada ao tentar arrastar com o dedo.
+**Causa:** A implementação atual detecta apenas o *final* do movimento (evento `onTouchEnd`) para trocar o slide. Não há feedback visual durante o movimento do dedo (1:1 finger tracking), criando uma desconexão cognitiva que o usuário percebe como lentidão. Além disso, a transição CSS de `1000ms` é muito lenta para interação tátil.
+**Solução Planejada:** Reescrever a lógica de gestos para acompanhar o dedo em tempo real e reduzir o tempo de transição após o soltar.
 
-### 1.1 Migração de Tailwind CDN para Build Local
-- **Problema Atual:** O uso de `<script src="https://cdn.tailwindcss.com"></script>` bloqueia a renderização inicial e baixa o motor inteiro do Tailwind no navegador do cliente (megabytes de CSS desnecessário).
-- **Solução Específica:**
-    - Remover o script da CDN do `index.html`.
-    - Configurar `postcss.config.js` e `tailwind.config.js` corretamente para processar o CSS localmente.
-    - Importar as diretivas do Tailwind (`@tailwind base;`, etc.) no `index.css`.
-    - Garantir que o `vite` processe o CSS, gerando um arquivo minificado e com "tree-shaking" (removendo classes não utilizadas) no build final.
-    - **Resultado Esperado:** Redução drástica no tempo de carregamento inicial (LCP) e pontuação de Performance no Lighthouse próxima a 100.
-
-### 1.2 Otimização de Imagens e Fontes
-- **Fontes:** As fontes 'Plus Jakarta Sans' e 'Archivo' já estão sendo carregadas, mas devem usar a propriedade `font-display: swap` para garantir que o texto seja visível imediatamente, mesmo antes da fonte carregar.
-- **Imagens:**
-    - Implementar componentes que solicitem imagens já dimensionadas para o dispositivo (srcset) se o backend suportar.
-    - Manter e reforçar o uso de `loading="lazy"` para imagens "abaixo da dobra" e `decoding="async"`.
-    - Adicionar placeholders de baixa resolução (blurhash) enquanto a imagem de alta qualidade carrega para evitar layout shifts (CLS).
+### 1.3 Banco de Dados e Latência
+**Diagnóstico:**
+- Falta de índices em chaves estrangeiras (Foreign Keys), o que torna queries de junção (JOINs) lentas conforme a base cresce.
+- Políticas de Segurança (RLS) duplicadas (ex: "Enable ALL" + política específica), fazendo o banco verificar permissões duas vezes para cada linha.
 
 ---
 
-## 2. Responsividade Mobile-First (Foco Principal)
+## 2. Plano de Implementação: Frontend (UX & Motion)
 
-O layout deve ser pensado primeiro para a tela pequena, expandindo-se para telas maiores.
+> **Diretriz:** Manter a identidade visual atual que foi aprovada. O foco é comportamento, física e refinamento.
 
-### 2.1 Área de Toque e Ergonomia
-- **Áreas de Toque:** Garantir que todos os elementos interativos (botões, ícones, links) tenham uma área clicável (padding) mínima de **44x44px** (padrão Apple/Google). Isso evita "cliques fantasmas" ou erros.
-- **Zona do Polegar:** Em mobile, posicionar ações críticas (como botões de "Salvar", "Compartilhar", "Voltar") na metade inferior da tela para facilitar o uso com uma mão.
-- **Safe Areas:** Respeitar as "safe areas" de dispositivos modernos (áreas do notch e da barra de navegação inferior/home indicator). Garantir que o conteúdo não fique oculto atrás dessas barras (usar `env(safe-area-inset-bottom)` no CSS).
+### 2.1 Otimização do Hero Carousel (Prioridade Máxima)
+**Objetivo:** Tornar o banner instantâneo e fluido.
+- **Remover Hardcoded Defaults:** O componente nunca deve iniciar com título/imagem genérica se os dados ainda não chegaram.
+- **Implementar Skeleton Premium:** Criar um Skeleton específico para o Banner que simule a estrutura exata (Título Grande, Categoria, Botão) com uma animação de "shimmer" sutil e escura (dark mode), para evitar o "flash" branco.
+- **Física de Arraste (Swipe Physiology):**
+  - Implementar *tracking* em tempo real: conforme o usuário arrasta o dedo, o slide deve se mover pixels correspondentes.
+  - Adicionar resistência elástica nas bordas (quando não há mais slides).
+  - Reduzir duração da animação automática de troca para `500ms` ou `600ms` com curva de Bezier `cubic-bezier(0.25, 1, 0.5, 1)` para sensação de "snap" rápido e suave.
+- **Preload de Imagens:** A imagem do primeiro slide deve ter prioridade máxima de carregamento (`<link rel="preload">` ou `priority` prop) para afetar o LCP (Largest Contentful Paint).
 
-### 2.2 Navegação e Gestos
-- **Menu Inferior (Bottom Navigation):** Se não houver, considerar mover a navegação principal para uma barra inferior fixa em mobile, ao invés de um menu "hambúrguer" no topo, para acesso imediato.
-- **Gestos de Swiper:** Implementar gestos de deslizar (swipe) para:
-    - Voltar entre páginas (se não for nativo do browser).
-    - Dispensar modais (arrastar para baixo).
-    - Alternar entre abas ou carrosséis de notícias.
+### 2.2 Micro-interações e Feedback Visual
+- **Feedback de Toque:** Adicionar estado `active` (scale 0.98) instantâneo em todos os cards e botões ao tocar, para confirmar que o clique foi registrado antes da navegação ocorrer.
+- **Lazy Loading Inteligente:** Manter o ` IntersectionObserver` atual, mas aumentar a margem de disparo (`rootMargin`) para que o conteúdo carregue *antes* de entrar na tela, evitando que o usuário veja áreas em branco "chegando".
+- **Transições de Página:** Suavizar a entrada de novas rotas. Em vez de um corte seco, o conteúdo novo deve fazer um leve `fade-in` (ex: 200ms).
 
----
-
-## 3. UI e Design System
-
-Refinamento visual para transmitir uma sensação "Premium" e moderna.
-
-### 3.1 Tipografia e Hierarquia
-- **Escala Modular:** Definir tamanhos de fonte responsivos (`text-base`, `text-lg`, `text-xl`) que escalam matematicamente. Em mobile, reduzir ligeiramente os títulos grandes (`h1`, `h2`) para evitar quebras de linha excessivas e desequilíbrio visual.
-- **Espaçamento (Whitespace):** Aumentar o espaçamento entre seções em mobile. O "respiro" é fundamental para um design limpo. Usar múltiplos de 4px (sistema de grid de 8px).
-
-### 3.2 Ícones e Elementos Visuais
-- **Padronização:** Utilizar a biblioteca `lucide-react` com consistência.
-    - Definir `stroke-width` (espessura) consistente (ex: 1.5px ou 2px) para todos os ícones para manter a leveza.
-    - Garantir que ícones em botões tenham alinhamento óptico perfeito com o texto.
-- **Estados dos Botões:**
-    - Definir estados claros para: `default`, `hover`, `active` (pressionado), `disabled` e `loading`.
-    - O estado `active` deve dar feedback tátil visual (leve redução de escala: `scale-95`).
-
-### 3.3 Cores e Modo Escuro
-- **Contraste:** Verificar se as cores de texto cinza claro (ex: datas, autores) passam nos testes de acessibilidade WCAG em telas de brilho reduzido (comum em economia de bateria).
-- **Glassmorphism:** Utilizar efeitos de desfoque (`backdrop-blur`) sutil em elementos flutuantes como Header, Modais e Toasts para um visual moderno (estilo iOS).
+### 2.3 Melhorias de Layout Mobile
+- **Áreas de Toque:** Aumentar a área clicável dos botões de navegação lateral (setas) no mobile, ou removê-las em favor de indicadores de paginação (bolinhas) mais visíveis, já que o *swipe* será o principal método.
+- **Fontes em Mobile:** Revisar tamanhos de fonte H1/H2 em telas < 375px para evitar quebras de linha que ocupem verticalmente mais de 40% da tela inicial.
 
 ---
 
-## 4. Animações e Micro-interações
+## 3. Plano de Implementação: Performance e Database
 
-Animações devem ser intencionais e performáticas.
+As alterações abaixo devem ser aplicadas DIRETAMENTE no Supabase via SQL Editor para sanar gargalos invisíveis.
 
-### 4.1 Transições de Página
-- Adicionar transições suaves entre rotas (fade + leve slide up) para que a navegação pareça fluida e nativa de um app, não um reload de site.
+### 3.1 Índices de Banco de Dados (Database Indexing)
+O banco atual reporta chaves estrangeiras sem índices, o que degrada a performance de *joins*.
+**Ação:** Criar índices para as seguintes colunas:
+1. `analytics_events(user_id)`
+2. `analytics_page_views(user_id)`
+3. `editorial_items(news_item_id)` e `editorial_items(edition_id)`
+4. `newsletter_items_rel(news_item_id)` e `newsletter_items_rel(edition_id)`
+5. `newsletter_subscriptions(user_id)` (se houver)
 
-### 4.2 Feedback Interativo
-- **Micro-interações:**
-    - Ao clicar em "Salvar", o ícone deve ter uma pequena animação de "pulo" ou preenchimento animado.
-    - Inputs de formulário devem focar suavemente com transição de borda e sombra.
-- **Skeleton Loading:** Substituir o spinner de carregamento (`LoadingFallback`) por telas de "Skeleton" (esqueletos pulsantes cinzas) que imitam o layout do conteúdo que vai chegar. Isso reduz a percepção de espera.
+### 3.2 Otimização de RLS (Row Level Security)
+**Problema:** Tabelas como `profiles` e `videos` possuem múltiplas políticas permissivas sobrepostas (ex: uma policy libera tudo, outra libera leitura pública).
+**Ação:**
+- Unificar políticas redundantes.
+- Garantir que tabelas públicas (como `news_items`, `videos`) tenham uma única política `Enable Read Access for All` otimizada, sem verificar `auth.uid()` se não for necessário.
 
-### 4.3 Performance de Animação
-- Usar estritamente propriedades `transform` e `opacity` para animações. Evitar animar `width`, `height`, `margin` ou `top/left` que causam recálculos de layout pesados.
-
----
-
-## 5. Melhorias Específicas Detectadas (Correções Imediatas)
-
-1.  **NewsCard:**
-    - **Hover:** O efeito de zoom na imagem deve ser sutil e suave (`duration-500`, `ease-out`).
-    - **Sombra:** Suavizar as sombras (`shadow-sm` para `shadow-md` no hover) para não parecer "sujo".
-    - **Texto:** Garantir `line-clamp` adequado para evitar que títulos longos quebrem o alinhamento dos cards vizinhos em grid.
-
-2.  **Modais (ShareModal):**
-    - Garantir que o modal bloqueie o scroll da página de fundo (`body-scroll-lock`) quando aberto, para evitar a sensação de "site solto" atrás.
-    - Adicionar animação de entrada (slide up bottom em mobile, fade in + scale em desktop).
-
-3.  **PWA (Progressive Web App):**
-    - Verificar e personalizar a "Splash Screen" gerada.
-    - Garantir que a `theme-color` no meta tag coincida com o header/fundo para evitar barras brancas/pretas do sistema operacional no topo e fundo.
+### 3.3 Cache Strategy (Frontend)
+- **SWR / React Query:** (Sugestão Futura) Migrar do `useEffect` manual para bibliotecas de data-fetching que gerenciam cache, revalidação e background fetching automaticamente.
+- **Correção Imediata:** Garantir que o `useEffect` do `Home.tsx` não "limpe" o estado dos dados anteriores se a nova requisição falhar, mas mostre um indicador de "atualizando" discreto.
 
 ---
 
-## Resumo do Plano de Ação
+## 4. Roteiro de Execução (Checklist)
 
-1.  **Imediato:** Migrar Tailwind para build local (Critical Performance Fix).
-2.  **Curto Prazo:** Padronizar componentes de UI (Botões, Ícones) e implementar Skeleton Loading.
-3.  **Médio Prazo:** Revisão completa de responsividade (margins, paddings, safe-areas) e implementação de animações de transição de página.
+### Fase 1: Correção Visual e UX (Frontend)
+- [ ] **HeroCarousel:** Remover dados estáticos iniciais.
+- [ ] **HeroCarousel:** Adicionar prop `isLoading` e renderizar Skeleton enquanto `true`.
+- [ ] **HeroCarousel:** Refatorar lógica de touch para usar `transform: translateX` dinâmico durante o arraste.
+- [ ] **CSS:** Atualizar todas as transições de `1000ms` para `500ms-600ms` em elementos interativos.
+- [ ] **App.tsx:** Implementar `Suspense` com um Loading visualmente compatível com o design do app (não apenas spin) nas trocas de rota.
+
+### Fase 2: Performance de Dados (Supabase)
+- [ ] Executar script SQL de criação de índices (Index Creation).
+- [ ] Revisar e consolidar Policies RLS para `profiles`, `videos` e `news_items`.
+- [ ] Verificar logs de *Slow Queries* no Supabase após 24h de uso.
+
+### Fase 3: Polimento Final
+- [ ] Auditoria Lighthouse/PageSpeed no Mobile. Meta: Performance > 90.
+- [ ] Teste de Stress no Swipe do carrossel (garantir que não trava a thread principal).
+
+---
+*Este documento serve como guia estrito para as próximas etapas de desenvolvimento. Nenhuma alteração visual de estilo (cores, fontes) está autorizada, apenas layout, comportamento e infraestrutura.*

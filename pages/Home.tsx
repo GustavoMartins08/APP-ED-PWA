@@ -214,6 +214,7 @@ const Home: React.FC = () => {
         latestNews={news[0]}
         latestNewsletter={newsletters[0]}
         latestEditorial={editorials[0]}
+        isLoading={loading}
       />
 
       <ScrollLineDivider />

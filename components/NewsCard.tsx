@@ -71,7 +71,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ item, variant = 'vertical', index =
     return (
       <div
         ref={cardRef}
-        className={`relative group overflow-hidden transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+        className={`relative group overflow-hidden transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
       >
         <Link to={detailLink} state={{ showPdf: false }} className="flex flex-col sm:flex-row gap-6 md:gap-10 items-start relative z-0">
           <div className="w-full sm:w-2/5 md:w-1/3 aspect-video sm:aspect-[4/3] md:aspect-square lg:aspect-[4/3] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shrink-0 shadow-sm bg-gray-100 relative gpu-accelerated">
